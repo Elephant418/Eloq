@@ -73,12 +73,25 @@ class FormFilter {
     /*************************************************************************
     PROTECTED METHODS
      *************************************************************************/
-    public function isPHPFilter( $name ) {
-        return ( filter_id( $name ) !== FALSE );
+    public function isPHPFilter( &$id ) {
+        if ( is_string( $id ) ) {
+            return ( filter_id( $id ) !== FALSE );
+        }
+        if ( is_int( $id ) ) {
+            foreach( filter_list() as $name ) {
+                if ( filter_id( $name ) == $id ) {
+                    return TRUE;
+                }
+            }
+        }
+        return FALSE;
     }
-    public function getPHPFilter( $name, $options ) {
-        return function( $field ) use ( $options ) {
-            return filter_var( $field, $name, $options );
+    public function getPHPFilter( $id, $options ) {
+        if ( is_string( $id ) ) {
+            $id = filter_id( $id );
+        }
+        return function( $field ) use ( $id, $options ) {
+            return filter_var( $field, $id, $options );
         };
     }
     public function isCustomFilter( $name ) {

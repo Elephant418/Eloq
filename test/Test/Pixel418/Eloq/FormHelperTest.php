@@ -89,4 +89,30 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals( $password, $form->getFieldValue( 'password' ), 'Existing required entry' );
         $this->assertEquals( array( ), $form->getFieldMessages( 'password' ), 'No error message for required entry' );
     }
+
+
+
+    /*************************************************************************
+    PHP FILTER TEST METHODS
+     *************************************************************************/
+    public function testPHPfilter_SanitizeStripTag_AsId( ) {
+        $username = 'tzi<script>';
+        $_POST[ 'username' ] = $username;
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addFilter( 'username', FILTER_SANITIZE_STRING );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
+        $this->assertEquals( 'tzi', $form->getFieldValue( 'username' ), 'Sanitize script tag' );
+    }
+    public function testPHPfilter_SanitizeStripTag_AsName( ) {
+        $username = 'tzi<script>';
+        $_POST[ 'username' ] = $username;
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addFilter( 'username', 'string' );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
+        $this->assertEquals( 'tzi', $form->getFieldValue( 'username' ), 'Sanitize script tag' );
+    }
 }
