@@ -16,8 +16,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testInactiveForm( ) {
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addField( 'password' );
         $this->assertFalse( $form->isActive( ) );
     }
@@ -25,8 +25,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     public function testActiveFullForm( ) {
         $_POST[ 'username' ] = 'tzi';
         $_POST[ 'password' ] = 'secret';
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addField( 'password' );
         $this->assertTrue( $form->isActive( ) );
     }
@@ -34,8 +34,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     public function testActivePartialForm( ) {
         $username = 'tzi';
         $_POST[ 'username' ] = $username;
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addField( 'password' );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
         $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
