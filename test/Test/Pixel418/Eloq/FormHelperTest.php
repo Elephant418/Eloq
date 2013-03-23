@@ -53,8 +53,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     public function testRequiredEntry_Null( ) {
         $username = 'tzi';
         $_POST[ 'username' ] = $username;
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addField( 'password' )
             ->addFilter( 'password', 'required' );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
@@ -66,8 +66,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
         $username = 'tzi';
         $_POST[ 'username' ] = $username;
         $_POST[ 'password' ] = '';
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addField( 'password' )
             ->addFilter( 'password', 'required' );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
@@ -80,8 +80,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
         $password = 'secret';
         $_POST[ 'username' ] = $username;
         $_POST[ 'password' ] = $password;
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addField( 'password' )
             ->addFilter( 'password', 'required' );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
@@ -98,8 +98,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     public function testPHPfilter_SanitizeStripTag_AsId( ) {
         $username = 'tzi<script>';
         $_POST[ 'username' ] = $username;
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addFilter( 'username', FILTER_SANITIZE_STRING );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
         $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
@@ -108,8 +108,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     public function testPHPfilter_SanitizeStripTag_AsName( ) {
         $username = 'tzi<script>';
         $_POST[ 'username' ] = $username;
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addFilter( 'username', 'string' );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
         $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
@@ -118,8 +118,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     public function testPHPfilter_ValidateEmail_Nok( ) {
         $username = 'tzi';
         $_POST[ 'username' ] = $username;
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addFilter( 'username', 'validate_email' );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
         $this->assertFalse( $form->isValid( ), 'Form is detected as invalid' );
@@ -128,8 +128,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     public function testPHPfilter_ValidateEmail_Ok( ) {
         $username = 'tzi@domain.tld';
         $_POST[ 'username' ] = $username;
-        $form = ( new FormHelper )
-            ->addField( 'username' )
+        $form = ( new FormHelper );
+        $form->addField( 'username' )
             ->addFilter( 'username', 'validate_email' );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
         $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
@@ -138,8 +138,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
     public function testPHPfilter_ValidateBoolean( ) {
         $someBoolean = '0';
         $_POST[ 'entry' ] = $someBoolean;
-        $form = ( new FormHelper )
-            ->addField( 'entry' )
+        $form = ( new FormHelper );
+        $form->addField( 'entry' )
             ->addFilter( 'entry', 'boolean' );
         $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
         $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
