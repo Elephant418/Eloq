@@ -115,4 +115,34 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase {
         $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
         $this->assertEquals( 'tzi', $form->getFieldValue( 'username' ), 'Sanitize script tag' );
     }
+    public function testPHPfilter_ValidateEmail_Nok( ) {
+        $username = 'tzi';
+        $_POST[ 'username' ] = $username;
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addFilter( 'username', 'validate_email' );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertFalse( $form->isValid( ), 'Form is detected as invalid' );
+        $this->assertNull( $form->getFieldValue( 'username' ), 'Non-valid form entry is null' );
+    }
+    public function testPHPfilter_ValidateEmail_Ok( ) {
+        $username = 'tzi@domain.tld';
+        $_POST[ 'username' ] = $username;
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addFilter( 'username', 'validate_email' );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
+        $this->assertEquals( $username, $form->getFieldValue( 'username' ), 'Valid form entry is kept' );
+    }
+    public function testPHPfilter_ValidateBoolean( ) {
+        $someBoolean = '0';
+        $_POST[ 'entry' ] = $someBoolean;
+        $form = ( new FormHelper )
+            ->addField( 'entry' )
+            ->addFilter( 'entry', 'boolean' );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
+        $this->assertFalse( $form->getFieldValue( 'entry' ), 'Valid boolean entry is converted' );
+    }
 }

@@ -91,7 +91,14 @@ class FormFilter {
             $id = filter_id( $id );
         }
         return function( $field ) use ( $id, $options ) {
-            return filter_var( $field, $id, $options );
+            if ( $id === FILTER_VALIDATE_BOOLEAN ) {
+                $options[ 'flags' ] = FILTER_NULL_ON_FAILURE;
+            }
+            $filtered =  filter_var( $field, $id, $options );
+            if ( $id !== FILTER_VALIDATE_BOOLEAN && $filtered === FALSE ) {
+                $filtered = NULL;
+            }
+            return $filtered;
         };
     }
     public function isCustomFilter( $name ) {
