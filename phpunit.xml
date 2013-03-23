@@ -1,0 +1,5 @@
+<phpunit colors="true">
+    <testsuite name="Eloq">
+        <directory>./test/Test/Pixel418/Eloq</directory>
+    </testsuite>
+</phpunit>

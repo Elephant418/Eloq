@@ -1,0 +1,92 @@
+<?php
+
+namespace Test\Pixel418\Eloq;
+
+require_once __DIR__ . '/../../../../vendor/autoload.php';
+
+use Pixel418\Eloq\FormHelper as FormHelper;
+
+echo 'Eloq ' . 'v0.1' . ' tested with ';
+
+class FormHelperTest extends \PHPUnit_Framework_TestCase {
+
+    public function testNewInstance( ) {
+        $form = new FormHelper( );
+        $this->assertTrue( is_a( $form, 'Pixel418\\Eloq\\Stack\\Util\\FormHelper' ) );
+    }
+
+    public function testInactiveForm( ) {
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addField( 'password' );
+        $this->assertFalse( $form->isActive( ) );
+    }
+
+    public function testActiveFullForm( ) {
+        $_POST[ 'username' ] = 'tzi';
+        $_POST[ 'password' ] = 'secret';
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addField( 'password' );
+        $this->assertTrue( $form->isActive( ) );
+    }
+
+    public function testActivePartialForm( ) {
+        $username = 'tzi';
+        $_POST[ 'username' ] = $username;
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addField( 'password' );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
+        $this->assertEquals( $username, $form->getFieldValue( 'username' ), 'Existing form entry is correct' );
+        $this->assertEquals( array( ), $form->getFieldMessages( 'username' ), 'No message for existing entry' );
+        $this->assertNull( $form->getFieldValue( 'password' ), 'Non-existing form entry is null' );
+        $this->assertEquals( array( ), $form->getFieldMessages( 'password' ), 'No message for non-existing entry' );
+    }
+
+
+
+    /*************************************************************************
+    REQUIRED TEST METHODS
+     *************************************************************************/
+    public function testRequiredEntry_Null( ) {
+        $username = 'tzi';
+        $_POST[ 'username' ] = $username;
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addField( 'password' )
+            ->addFilter( 'password', 'required' );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertFalse( $form->isValid( ), 'Form is detected as invalid' );
+        $this->assertNull( $form->getFieldValue( 'password' ), 'Non-existing form entry is null' );
+        $this->assertEquals( 1, count( $form->getFieldMessages( 'password' ) ), 'One error message for required entry' );
+    }
+    public function testRequiredEntry_Empty( ) {
+        $username = 'tzi';
+        $_POST[ 'username' ] = $username;
+        $_POST[ 'password' ] = '';
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addField( 'password' )
+            ->addFilter( 'password', 'required' );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertFalse( $form->isValid( ), 'Form is detected as invalid' );
+        $this->assertNull( $form->getFieldValue( 'password' ), 'Non-existing form entry is null' );
+        $this->assertEquals( 1, count( $form->getFieldMessages( 'password' ) ), 'One error message for required entry' );
+    }
+    public function testRequiredEntry_Given( ) {
+        $username = 'tzi';
+        $password = 'secret';
+        $_POST[ 'username' ] = $username;
+        $_POST[ 'password' ] = $password;
+        $form = ( new FormHelper )
+            ->addField( 'username' )
+            ->addField( 'password' )
+            ->addFilter( 'password', 'required' );
+        $this->assertTrue( $form->isActive( ), 'Form is detected as active' );
+        $this->assertTrue( $form->isValid( ), 'Form is detected as valid' );
+        $this->assertEquals( $password, $form->getFieldValue( 'password' ), 'Existing required entry' );
+        $this->assertEquals( array( ), $form->getFieldMessages( 'password' ), 'No error message for required entry' );
+    }
+}

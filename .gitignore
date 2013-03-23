@@ -1,0 +1,14 @@
+*~
+*.local.perso.ini
+composer.lock
+vendor/*
+src/Staq/App/*/cache/
+example/Example/Staq/*/cache/
+test/resource/Test/Staq/Project/*/cache/
+test/resource/Test/Staq/Project/*/*/cache/
+
+.buildpath
+.project
+.settings
+.idea
+
