@@ -63,7 +63,7 @@ class FormFilter
     {
         $callback = $this->callback;
         if (!is_callable($callback)) {
-            throw new \Exception('Invalid callback: ' . $this->name);
+            throw new \Exception('Filter not callable: ' . $this->name);
         }
         return $callback($field);
     }
@@ -121,6 +121,9 @@ class FormFilter
     public function getCustomFilter($name, $options)
     {
         $callback = static::$filters[$name];
+        if (!is_callable($callback)) {
+            throw new \Exception('Filter factory not callable: ' . $name);
+        }
         return $callback($options);
     }
 
