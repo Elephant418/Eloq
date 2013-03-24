@@ -42,29 +42,11 @@ class FormFilter
     /*************************************************************************
     STATIC METHODS
      *************************************************************************/
-    public static function initializeExistingFilters()
+    public function initializeExistingFilters()
     {
-        static::addCustomFilter('required', function () {
-            return function ($field) {
-                return (!is_null($field) && $field !== '');
-            };
-        });
-        \Stack\Util\FormFilter::addCustomFilter('max_length', function ($options) {
-            return function ($field) use ($options) {
-                if ( ! isset($options['length'])) {
-                    $options['length'] = '32';
-                }
-                return (strlen($field)<$options['length']);
-            };
-        });
-        \Stack\Util\FormFilter::addCustomFilter('min_length', function ($options) {
-            return function ($field) use ($options) {
-                if ( ! isset($options['length'])) {
-                    $options['length'] = '8';
-                }
-                return (strlen($field)>$options['length']);
-            };
-        });
+        static::addCustomFilter('required', array($this, 'filterRequired'));
+        static::addCustomFilter('max_length', array($this, 'filterMaxLength'));
+        static::addCustomFilter('min_length', array($this, 'filterMinLength'));
         static::$isInitialized = TRUE;
     }
 
@@ -146,6 +128,37 @@ class FormFilter
     {
         return function ($field) {
             return $field;
+        };
+    }
+
+
+    /*************************************************************************
+    CUSTOM FILTER METHODS
+     *************************************************************************/
+    public static function filterRequired()
+    {
+        return function ($field) {
+            return (!is_null($field) && $field !== '');
+        };
+    }
+
+    public static function filterMaxLength($options)
+    {
+        return function ($field) use ($options) {
+            if (!isset($options['length'])) {
+                $options['length'] = '32';
+            }
+            return (strlen($field) <= $options['length']);
+        };
+    }
+
+    public static function filterMinLength($options)
+    {
+        return function ($field) use ($options) {
+            if (!isset($options['length'])) {
+                $options['length'] = '8';
+            }
+            return (strlen($field) >= $options['length']);
         };
     }
 }

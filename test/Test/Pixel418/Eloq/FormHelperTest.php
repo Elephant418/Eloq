@@ -5,6 +5,7 @@ namespace Test\Pixel418\Eloq;
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
 use Pixel418\Eloq\FormHelper as FormHelper;
+use Pixel418\Eloq\FormFilter as FormFilter;
 
 echo 'Eloq ' . 'v0.1' . ' tested with ';
 
@@ -97,6 +98,57 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
         $this->assertEquals($password, $form->get('password'), 'Existing required entry');
         $this->assertEquals(array(), $form->getErrors('password'), 'No error message for required entry');
+    }
+
+
+    /*************************************************************************
+    MAX & MIN LENGTH TEST METHODS
+     *************************************************************************/
+    public function testMaxLengthEntry_Nok()
+    {
+        $username = '1234567890123456';
+        $_POST['username'] = $username;
+        $form = (new FormHelper);
+        $form->addField('username')
+            ->addFilter('username', 'max_length', 'Too long', array('length' => 15));
+        $this->assertTrue($form->isActive(), 'Form is detected as active');
+        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
+        $this->assertEquals(1, count($form->getErrors('username')), 'One error message for too long entry');
+    }
+
+    public function testMaxLengthEntry_Ok()
+    {
+        $username = '1234567890123456';
+        $_POST['username'] = $username;
+        $form = (new FormHelper);
+        $form->addField('username')
+            ->addFilter('username', 'max_length', 'Too long', array('length' => 16));
+        $this->assertTrue($form->isActive(), 'Form is detected as active');
+        $this->assertTrue($form->isValid(), 'Form is detected as invalid');
+        $this->assertEquals(0, count($form->getErrors('v')), 'No error message for too long entry');
+    }
+    public function testMinLengthEntry_Nok()
+    {
+        $username = '1234567890123456';
+        $_POST['username'] = $username;
+        $form = (new FormHelper);
+        $form->addField('username')
+            ->addFilter('username', 'min_length', 'Too short', array('length' => 17));
+        $this->assertTrue($form->isActive(), 'Form is detected as active');
+        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
+        $this->assertEquals(1, count($form->getErrors('username')), 'One error message for short long entry');
+    }
+
+    public function testMinLengthEntry_Ok()
+    {
+        $username = '1234567890123456';
+        $_POST['username'] = $username;
+        $form = (new FormHelper);
+        $form->addField('username')
+            ->addFilter('username', 'min_length', 'Too short', array('length' => 16));
+        $this->assertTrue($form->isActive(), 'Form is detected as active');
+        $this->assertTrue($form->isValid(), 'Form is detected as invalid');
+        $this->assertEquals(0, count($form->getErrors('v')), 'No error message for too short entry');
     }
 
 
