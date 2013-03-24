@@ -13,6 +13,7 @@ class FormFilter
      *************************************************************************/
     static $filters = array();
     static $isInitialized = FALSE;
+    protected $name;
     protected $callback;
     protected $error;
 
@@ -32,6 +33,7 @@ class FormFilter
         } else {
             $callback = $this->getDefaultFilter();
         }
+        $this->name = $name;
         $this->error = $error;
         $this->callback = $callback;
     }
@@ -45,6 +47,22 @@ class FormFilter
         static::addCustomFilter('required', function () {
             return function ($field) {
                 return (!is_null($field) && $field !== '');
+            };
+        });
+        \Stack\Util\FormFilter::addCustomFilter('max_length', function ($options) {
+            return function ($field) use ($options) {
+                if ( ! isset($options['length'])) {
+                    $options['length'] = '32';
+                }
+                return (strlen($field)<$options['length']);
+            };
+        });
+        \Stack\Util\FormFilter::addCustomFilter('min_length', function ($options) {
+            return function ($field) use ($options) {
+                if ( ! isset($options['length'])) {
+                    $options['length'] = '8';
+                }
+                return (strlen($field)>$options['length']);
             };
         });
         static::$isInitialized = TRUE;
@@ -62,6 +80,9 @@ class FormFilter
     public function call(&$field)
     {
         $callback = $this->callback;
+        if (!is_callable($callback)) {
+            throw new \Exception('Invalid callback: ' . $this->name);
+        }
         return $callback($field);
     }
 
