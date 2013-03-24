@@ -14,7 +14,7 @@ class FormHelper
     protected $fields = array();
     protected $values = array();
     protected $filters = array();
-    protected $messages = array();
+    protected $errors = array();
     protected $isTreated = FALSE;
     protected $isActive = FALSE;
     protected $isValid = FALSE;
@@ -31,7 +31,7 @@ class FormHelper
         $this->fields[$name] = $address;
         $this->values[$name] = NULL;
         $this->filters[$name] = array();
-        $this->messages[$name] = array();
+        $this->errors[$name] = array();
         return $this;
     }
 
@@ -40,7 +40,7 @@ class FormHelper
         unset($this->fields[$name]);
         unset($this->values[$name]);
         unset($this->filters[$name]);
-        unset($this->messages[$name]);
+        unset($this->errors[$name]);
         return $this;
     }
 
@@ -53,9 +53,9 @@ class FormHelper
     /*************************************************************************
     FIELD METHODS
      *************************************************************************/
-    public function addFilter($fieldName, $filterName, $message = 'Field invalid', $options = array())
+    public function addFilter($fieldName, $filterName, $error = 'Field invalid', $options = array())
     {
-        $filter = new FormFilter($filterName, $message, $options);
+        $filter = new FormFilter($filterName, $error, $options);
         $this->filters[$fieldName][$filterName] = $filter;
         return $this;
     }
@@ -82,6 +82,11 @@ class FormHelper
         return $this->isValid;
     }
 
+    public function get($field)
+    {
+        return $this->getFieldValue($field);
+    }
+
     public function getFieldValue($field)
     {
         $this->treat();
@@ -97,26 +102,36 @@ class FormHelper
         return $this->values;
     }
 
-    public function getFieldMessages($field)
+    public function hasErrors($field)
+    {
+        return (count($this->getErrors($field))>0);
+    }
+
+    public function hasFieldErrors($field)
+    {
+        return (count($this->getFieldErrors($field))>0);
+    }
+
+    public function getFieldErrors($field)
     {
         $this->treat();
-        if (isset($this->messages[$field])) {
-            return $this->messages[$field];
+        if (isset($this->errors[$field])) {
+            return $this->errors[$field];
         }
         return array();
     }
 
-    public function getMessages()
+    public function getErrors()
     {
         $this->treat();
-        return $this->messages;
+        return $this->errors;
     }
 
 
     /*************************************************************************
     PRIVATE METHODS
      *************************************************************************/
-    protected function initSubmitedValues()
+    protected function initSubmittedValues()
     {
         if ($this->isTreated) {
             return NULL;
@@ -135,7 +150,7 @@ class FormHelper
         if ($this->isTreated) {
             return NULL;
         }
-        $this->initSubmitedValues();
+        $this->initSubmittedValues();
         $this->isTreated = TRUE;
         if (!$this->isActive) {
             return NULL;
@@ -145,7 +160,7 @@ class FormHelper
             foreach ($filters as $filterName => $filter) {
                 $value =& $this->values[$fieldName];
                 if (!$filter->call($value)) {
-                    $this->messages[$fieldName][$filterName] = $filter->getMessage();
+                    $this->errors[$fieldName][$filterName] = $filter->getError();
                     $this->isValid = FALSE;
                 }
             }

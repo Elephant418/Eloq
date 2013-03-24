@@ -45,9 +45,9 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
         $this->assertEquals($username, $form->getFieldValue('username'), 'Existing form entry is correct');
-        $this->assertEquals(array(), $form->getFieldMessages('username'), 'No message for existing entry');
+        $this->assertEquals(array(), $form->getFieldErrors('username'), 'No message for existing entry');
         $this->assertNull($form->getFieldValue('password'), 'Non-existing form entry is null');
-        $this->assertEquals(array(), $form->getFieldMessages('password'), 'No message for non-existing entry');
+        $this->assertEquals(array(), $form->getFieldErrors('password'), 'No message for non-existing entry');
     }
 
 
@@ -65,7 +65,7 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
         $this->assertNull($form->getFieldValue('password'), 'Non-existing form entry is null');
-        $this->assertEquals(1, count($form->getFieldMessages('password')), 'One error message for required entry');
+        $this->assertEquals(1, count($form->getFieldErrors('password')), 'One error message for required entry');
     }
 
     public function testRequiredEntry_Empty()
@@ -80,7 +80,7 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
         $this->assertEquals('', $form->getFieldValue('password'), 'Required form entry is intact');
-        $this->assertEquals(1, count($form->getFieldMessages('password')), 'One error message for required entry');
+        $this->assertEquals(1, count($form->getFieldErrors('password')), 'One error message for required entry');
     }
 
     public function testRequiredEntry_Given()
@@ -96,7 +96,7 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
         $this->assertEquals($password, $form->getFieldValue('password'), 'Existing required entry');
-        $this->assertEquals(array(), $form->getFieldMessages('password'), 'No error message for required entry');
+        $this->assertEquals(array(), $form->getFieldErrors('password'), 'No error message for required entry');
     }
 
 
@@ -137,7 +137,7 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
         $this->assertEquals('tzi', $form->getFieldValue('username'), 'Non-valid email form entry is intact');
-        $this->assertEquals(1, count($form->getFieldMessages('username')), 'One error message for non-valid email entry');
+        $this->assertEquals(1, count($form->getFieldErrors('username')), 'One error message for non-valid email entry');
     }
 
     public function testPHPfilter_ValidateEmail_Ok()

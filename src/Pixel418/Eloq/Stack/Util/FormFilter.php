@@ -14,13 +14,13 @@ class FormFilter
     static $filters = array();
     static $isInitialized = FALSE;
     protected $callback;
-    protected $errorMessage;
+    protected $error;
 
 
     /*************************************************************************
     CONSTRUCTOR METHODS
      *************************************************************************/
-    public function __construct($name, $errorMessage, $options)
+    public function __construct($name, $error, $options)
     {
         if (!static::$isInitialized) {
             $this->initializeExistingFilters();
@@ -32,7 +32,7 @@ class FormFilter
         } else {
             $callback = $this->getDefaultFilter();
         }
-        $this->errorMessage = $errorMessage;
+        $this->error = $error;
         $this->callback = $callback;
     }
 
@@ -65,9 +65,9 @@ class FormFilter
         return $callback($field);
     }
 
-    public function getMessage()
+    public function getError()
     {
-        return $this->errorMessage;
+        return $this->error;
     }
 
 
