@@ -44,10 +44,10 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addField('password');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals($username, $form->getFieldValue('username'), 'Existing form entry is correct');
-        $this->assertEquals(array(), $form->getFieldErrors('username'), 'No message for existing entry');
-        $this->assertNull($form->getFieldValue('password'), 'Non-existing form entry is null');
-        $this->assertEquals(array(), $form->getFieldErrors('password'), 'No message for non-existing entry');
+        $this->assertEquals($username, $form->get('username'), 'Existing form entry is correct');
+        $this->assertEquals(array(), $form->getErrors('username'), 'No message for existing entry');
+        $this->assertNull($form->get('password'), 'Non-existing form entry is null');
+        $this->assertEquals(array(), $form->getErrors('password'), 'No message for non-existing entry');
     }
 
 
@@ -64,8 +64,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addFilter('password', 'required');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
-        $this->assertNull($form->getFieldValue('password'), 'Non-existing form entry is null');
-        $this->assertEquals(1, count($form->getFieldErrors('password')), 'One error message for required entry');
+        $this->assertNull($form->get('password'), 'Non-existing form entry is null');
+        $this->assertEquals(1, count($form->getErrors('password')), 'One error message for required entry');
     }
 
     public function testRequiredEntry_Empty()
@@ -79,8 +79,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addFilter('password', 'required');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
-        $this->assertEquals('', $form->getFieldValue('password'), 'Required form entry is intact');
-        $this->assertEquals(1, count($form->getFieldErrors('password')), 'One error message for required entry');
+        $this->assertEquals('', $form->get('password'), 'Required form entry is intact');
+        $this->assertEquals(1, count($form->getErrors('password')), 'One error message for required entry');
     }
 
     public function testRequiredEntry_Given()
@@ -95,8 +95,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addFilter('password', 'required');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals($password, $form->getFieldValue('password'), 'Existing required entry');
-        $this->assertEquals(array(), $form->getFieldErrors('password'), 'No error message for required entry');
+        $this->assertEquals($password, $form->get('password'), 'Existing required entry');
+        $this->assertEquals(array(), $form->getErrors('password'), 'No error message for required entry');
     }
 
 
@@ -112,7 +112,7 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addFilter('username', FILTER_SANITIZE_STRING);
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals('tzi', $form->getFieldValue('username'), 'Sanitize script tag');
+        $this->assertEquals('tzi', $form->get('username'), 'Sanitize script tag');
     }
 
     public function testPHPfilter_SanitizeStripTag_AsName()
@@ -124,7 +124,7 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addFilter('username', 'string');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals('tzi', $form->getFieldValue('username'), 'Sanitize script tag');
+        $this->assertEquals('tzi', $form->get('username'), 'Sanitize script tag');
     }
 
     public function testPHPfilter_ValidateEmail_Nok()
@@ -136,8 +136,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addFilter('username', 'validate_email');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
-        $this->assertEquals('tzi', $form->getFieldValue('username'), 'Non-valid email form entry is intact');
-        $this->assertEquals(1, count($form->getFieldErrors('username')), 'One error message for non-valid email entry');
+        $this->assertEquals('tzi', $form->get('username'), 'Non-valid email form entry is intact');
+        $this->assertEquals(1, count($form->getErrors('username')), 'One error message for non-valid email entry');
     }
 
     public function testPHPfilter_ValidateEmail_Ok()
@@ -149,7 +149,7 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addFilter('username', 'validate_email');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals($username, $form->getFieldValue('username'), 'Valid form entry is kept');
+        $this->assertEquals($username, $form->get('username'), 'Valid form entry is kept');
     }
 
     public function testPHPfilter_ValidateBoolean()
@@ -161,6 +161,6 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
             ->addFilter('entry', 'boolean');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertFalse($form->getFieldValue('entry'), 'Valid boolean entry is converted');
+        $this->assertFalse($form->get('entry'), 'Valid boolean entry is converted');
     }
 }

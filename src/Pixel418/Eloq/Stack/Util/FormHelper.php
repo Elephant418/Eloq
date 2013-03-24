@@ -82,11 +82,13 @@ class FormHelper
         return $this->isValid;
     }
 
-    public function get($field)
+    public function get($field=NULL)
     {
+        if ( func_num_args() == 0 ) {
+            return $this->getAllValues();
+        }
         return $this->getFieldValue($field);
     }
-
     public function getFieldValue($field)
     {
         $this->treat();
@@ -95,21 +97,31 @@ class FormHelper
         }
         return NULL;
     }
-
-    public function getValues()
+    public function getAllValues()
     {
         $this->treat();
         return $this->values;
     }
 
-    public function hasErrors($field)
+    public function hasErrors($field=NULL)
     {
-        return (count($this->getErrors($field))>0);
+        if ( func_num_args() == 0 ) {
+            return (count($this->getAllErrors())>0);
+        }
+        return $this->hasFieldErrors($field);
     }
 
     public function hasFieldErrors($field)
     {
         return (count($this->getFieldErrors($field))>0);
+    }
+
+    public function getErrors($field=NULL)
+    {
+        if ( func_num_args() == 0 ) {
+            return $this->getAllErrors();
+        }
+        return $this->getFieldErrors($field);
     }
 
     public function getFieldErrors($field)
@@ -121,7 +133,7 @@ class FormHelper
         return array();
     }
 
-    public function getErrors()
+    public function getAllErrors()
     {
         $this->treat();
         return $this->errors;
