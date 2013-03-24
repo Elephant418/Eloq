@@ -4,4 +4,6 @@
 
 namespace Pixel418\Eloq;
 
-class FormFilter extends \Pixel418\Eloq\Stack\Util\FormFilter { }
+class FormFilter extends \Pixel418\Eloq\Stack\Util\FormFilter
+{
+}

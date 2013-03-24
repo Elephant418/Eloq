@@ -4,112 +4,126 @@
 
 namespace Pixel418\Eloq\Stack\Util;
 
-class FormFilter {
+class FormFilter
+{
 
 
-
-	/*************************************************************************
-	  ATTIBUTES
-	 *************************************************************************/
-    static $filters = array( );
+    /*************************************************************************
+    ATTRIBUTES
+     *************************************************************************/
+    static $filters = array();
     static $isInitialized = FALSE;
-	protected $callback;
-	protected $errorMessage;
+    protected $callback;
+    protected $errorMessage;
 
 
-
-	/*************************************************************************
-	  CONSTRUCTOR METHODS
-	 *************************************************************************/
-	public function __construct( $name, $errorMessage, $options ) {
-        if ( ! static::$isInitialized ) {
-            $this->initializeExistingFilters( );
+    /*************************************************************************
+    CONSTRUCTOR METHODS
+     *************************************************************************/
+    public function __construct($name, $errorMessage, $options)
+    {
+        if (!static::$isInitialized) {
+            $this->initializeExistingFilters();
         }
-        if ( $this->isPHPFilter( $name ) ) {
-            $callback = $this->getPHPFilter( $name, $options );
-        } else if ( $this->isCustomFilter( $name ) ) {
-            $callback = $this->getCustomFilter( $name, $options );
+        if ($this->isPHPFilter($name)) {
+            $callback = $this->getPHPFilter($name, $options);
+        } else if ($this->isCustomFilter($name)) {
+            $callback = $this->getCustomFilter($name, $options);
         } else {
-            $callback = $this->getDefaultFilter( );
+            $callback = $this->getDefaultFilter();
         }
         $this->errorMessage = $errorMessage;
         $this->callback = $callback;
     }
 
 
-
     /*************************************************************************
     STATIC METHODS
      *************************************************************************/
-    public static function initializeExistingFilters( ) {
-        static::addCustomFilter( 'required', function( ) {
-            return function( $field ) {
-                if ( ! is_null( $field ) &&  $field != '' ) {
-                    return $field;
-                }
+    public static function initializeExistingFilters()
+    {
+        static::addCustomFilter('required', function () {
+            return function ($field) {
+                return (!is_null($field) && $field !== '');
             };
-        } );
+        });
         static::$isInitialized = TRUE;
     }
-    public static function addCustomFilter( $name, $callback ) {
-        static::$filters[ $name ] = $callback;
-    }
 
+    public static function addCustomFilter($name, $callback)
+    {
+        static::$filters[$name] = $callback;
+    }
 
 
     /*************************************************************************
     GETTER METHODS
      *************************************************************************/
-    public function call( &$field ) {
+    public function call(&$field)
+    {
         $callback = $this->callback;
-        $field = $callback( $field );
-    }
-    public function getMessage( ) {
-        return $this->errorMessage;
+        return $callback($field);
     }
 
+    public function getMessage()
+    {
+        return $this->errorMessage;
+    }
 
 
     /*************************************************************************
     PROTECTED METHODS
      *************************************************************************/
-    public function isPHPFilter( &$id ) {
-        if ( is_string( $id ) ) {
-            return ( filter_id( $id ) !== FALSE );
+    public function isPHPFilter(&$id)
+    {
+        if (is_string($id)) {
+            return (filter_id($id) !== FALSE);
         }
-        if ( is_int( $id ) ) {
-            foreach( filter_list() as $name ) {
-                if ( filter_id( $name ) == $id ) {
+        if (is_int($id)) {
+            foreach (filter_list() as $name) {
+                if (filter_id($name) == $id) {
                     return TRUE;
                 }
             }
         }
         return FALSE;
     }
-    public function getPHPFilter( $id, $options ) {
-        if ( is_string( $id ) ) {
-            $id = filter_id( $id );
+
+    public function getPHPFilter($id, $options)
+    {
+        if (is_string($id)) {
+            $id = filter_id($id);
         }
-        return function( $field ) use ( $id, $options ) {
-            if ( $id === FILTER_VALIDATE_BOOLEAN ) {
-                $options[ 'flags' ] = FILTER_NULL_ON_FAILURE;
+        return function (&$field) use ($id, $options) {
+            if ($id === FILTER_VALIDATE_BOOLEAN) {
+                $options['flags'] = FILTER_NULL_ON_FAILURE;
             }
-            $filtered =  filter_var( $field, $id, $options );
-            if ( $id !== FILTER_VALIDATE_BOOLEAN && $filtered === FALSE ) {
-                $filtered = NULL;
+            $filtered = filter_var($field, $id, $options);
+            if ($id !== FILTER_VALIDATE_BOOLEAN && $filtered === FALSE) {
+                return FALSE;
             }
-            return $filtered;
+            if ($id === FILTER_VALIDATE_BOOLEAN && $filtered === NULL) {
+                return FALSE;
+            }
+            $field = $filtered;
+            return TRUE;
         };
     }
-    public function isCustomFilter( $name ) {
-        return isset( static::$filters[ $name ] );
+
+    public function isCustomFilter($name)
+    {
+        return isset(static::$filters[$name]);
     }
-    public function getCustomFilter( $name, $options ) {
-        $callback = static::$filters[ $name ];
-        return $callback( $options );
+
+    public function getCustomFilter($name, $options)
+    {
+        $callback = static::$filters[$name];
+        return $callback($options);
     }
-    public function getDefaultFilter( ) {
-        return function( $field ) {
+
+    public function getDefaultFilter()
+    {
+        return function ($field) {
             return $field;
         };
     }
