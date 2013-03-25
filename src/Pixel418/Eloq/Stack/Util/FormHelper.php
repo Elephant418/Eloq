@@ -17,7 +17,6 @@ class FormHelper
     protected $errors = array();
     protected $isTreated = FALSE;
     protected $isActive = FALSE;
-    protected $isValid = FALSE;
 
 
     /*************************************************************************
@@ -31,7 +30,6 @@ class FormHelper
         $this->fields[$name] = $address;
         $this->values[$name] = NULL;
         $this->filters[$name] = array();
-        $this->errors[$name] = array();
         return $this;
     }
 
@@ -40,7 +38,6 @@ class FormHelper
         unset($this->fields[$name]);
         unset($this->values[$name]);
         unset($this->filters[$name]);
-        unset($this->errors[$name]);
         return $this;
     }
 
@@ -55,9 +52,23 @@ class FormHelper
      *************************************************************************/
     public function addFilter($fieldName, $filterName, $error = 'Field invalid', $options = array())
     {
-        $FormFilterClass = \UObject::getNamespace( $this ) . '\\FormFilter';
+        $FormFilterClass = \UObject::getNamespace($this) . '\\FormFilter';
         $filter = new $FormFilterClass($filterName, $error, $options);
         $this->filters[$fieldName][$filterName] = $filter;
+        return $this;
+    }
+
+    public function setFilterError($fieldName, $filterName, $error)
+    {
+        $this->getFilter($fieldName, $filterName)
+            ->setError($error);
+        return $this;
+    }
+
+    public function setFilterOptions($fieldName, $filterName, $options)
+    {
+        $this->getFilter($fieldName, $filterName)
+            ->setOptions($options);
         return $this;
     }
 
@@ -77,19 +88,34 @@ class FormHelper
         return $this->isActive;
     }
 
-    public function isValid()
+    public function isValid($field = NULL)
     {
-        $this->treat();
-        return $this->isValid;
+        if (func_num_args() == 0) {
+            return $this->isAllValid();
+        }
+        return $this->isFieldValid($field);
     }
 
-    public function get($field=NULL)
+    public function isFieldValid($field)
     {
-        if ( func_num_args() == 0 ) {
+        $errors = $this->getFieldErrors($field);
+        return (count($errors) == 0);
+    }
+
+    public function isAllValid()
+    {
+        $errors = $this->getAllErrors();
+        return (count($errors) == 0);
+    }
+
+    public function get($field = NULL)
+    {
+        if (func_num_args() == 0) {
             return $this->getAllValues();
         }
         return $this->getFieldValue($field);
     }
+
     public function getFieldValue($field)
     {
         $this->treat();
@@ -98,28 +124,16 @@ class FormHelper
         }
         return NULL;
     }
+
     public function getAllValues()
     {
         $this->treat();
         return $this->values;
     }
 
-    public function hasErrors($field=NULL)
+    public function getErrors($field = NULL)
     {
-        if ( func_num_args() == 0 ) {
-            return (count($this->getAllErrors())>0);
-        }
-        return $this->hasFieldErrors($field);
-    }
-
-    public function hasFieldErrors($field)
-    {
-        return (count($this->getFieldErrors($field))>0);
-    }
-
-    public function getErrors($field=NULL)
-    {
-        if ( func_num_args() == 0 ) {
+        if (func_num_args() == 0) {
             return $this->getAllErrors();
         }
         return $this->getFieldErrors($field);
@@ -158,6 +172,13 @@ class FormHelper
         }
     }
 
+    protected function getFilter($fieldName, $filterName) {
+        if (!isset($this->filters[$fieldName][$filterName])) {
+            throw new \Exception('Filter not found: ' . $filterName . ' on ' . $fieldName);
+        }
+        return $this->filters[$fieldName][$filterName];
+    }
+
     protected function treat()
     {
         if ($this->isTreated) {
@@ -168,13 +189,11 @@ class FormHelper
         if (!$this->isActive) {
             return NULL;
         }
-        $this->isValid = TRUE;
         foreach ($this->filters as $fieldName => $filters) {
             foreach ($filters as $filterName => $filter) {
                 $value =& $this->values[$fieldName];
                 if (!$filter->call($value)) {
                     $this->errors[$fieldName][$filterName] = $filter->getError();
-                    $this->isValid = FALSE;
                 }
             }
         }

@@ -26,16 +26,9 @@ class FormFilter
         if (!static::$isInitialized) {
             $this->initializeExistingFilters();
         }
-        if ($this->isPHPFilter($name)) {
-            $callback = $this->getPHPFilter($name, $options);
-        } else if ($this->isCustomFilter($name)) {
-            $callback = $this->getCustomFilter($name, $options);
-        } else {
-            $callback = $this->getDefaultFilter();
-        }
         $this->name = $name;
-        $this->error = $error;
-        $this->callback = $callback;
+        $this->setError($error);
+        $this->setOptions($options);
     }
 
 
@@ -71,6 +64,28 @@ class FormFilter
     public function getError()
     {
         return $this->error;
+    }
+
+
+    /*************************************************************************
+    SETTER METHODS
+     *************************************************************************/
+    public function setError($error)
+    {
+        $this->error = $error;
+        return $this;
+    }
+
+    public function setOptions($options)
+    {
+        if ($this->isPHPFilter($this->name)) {
+            $callback = $this->getPHPFilter($this->name, $options);
+        } else if ($this->isCustomFilter($this->name)) {
+            $callback = $this->getCustomFilter($this->name, $options);
+        } else {
+            $callback = $this->getDefaultFilter();
+        }
+        $this->callback = $callback;
     }
 
 

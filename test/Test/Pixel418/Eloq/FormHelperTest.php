@@ -127,6 +127,7 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isValid(), 'Form is detected as invalid');
         $this->assertEquals(0, count($form->getErrors('v')), 'No error message for too long entry');
     }
+
     public function testMinLengthEntry_Nok()
     {
         $username = '1234567890123456';
