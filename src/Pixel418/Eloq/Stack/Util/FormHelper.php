@@ -55,7 +55,8 @@ class FormHelper
      *************************************************************************/
     public function addFilter($fieldName, $filterName, $error = 'Field invalid', $options = array())
     {
-        $filter = new FormFilter($filterName, $error, $options);
+        $FormFilterClass = \UObject::getNamespace( $this ) . '\\FormFilter';
+        $filter = new $FormFilterClass($filterName, $error, $options);
         $this->filters[$fieldName][$filterName] = $filter;
         return $this;
     }
