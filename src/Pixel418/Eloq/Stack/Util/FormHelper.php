@@ -53,7 +53,7 @@ class FormHelper
     public function addFilter($fieldName, $filterName, $error = 'Field invalid', $options = array())
     {
         if (!isset($this->fields[$fieldName])) {
-            throw new \Exception('Unknown field: '.$name);
+            throw new \Exception('Unknown field: ' . $name);
         }
         $FormFilterClass = \UObject::getNamespace($this) . '\\FormFilter';
         $filter = new $FormFilterClass($filterName, $error, $options);
@@ -93,6 +93,9 @@ class FormHelper
 
     public function isValid($field = NULL)
     {
+        if (!$this->isActive()) {
+            return FALSE;
+        }
         if (func_num_args() == 0) {
             return $this->isAllValid();
         }
@@ -175,9 +178,10 @@ class FormHelper
         }
     }
 
-    protected function getFilter($fieldName, $filterName) {
+    protected function getFilter($fieldName, $filterName)
+    {
         if (!isset($this->fields[$fieldName])) {
-            throw new \Exception('Unknown field: '.$name);
+            throw new \Exception('Unknown field: ' . $name);
         }
         if (!isset($this->filters[$fieldName][$filterName])) {
             throw new \Exception('Filter not found: ' . $filterName . ' on ' . $fieldName);
