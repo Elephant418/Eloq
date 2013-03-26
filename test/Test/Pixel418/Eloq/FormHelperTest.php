@@ -238,4 +238,33 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
     }
+
+
+    /*************************************************************************
+    EXCEPTION TEST METHODS
+     *************************************************************************/
+    public function testException_UnknownField()
+    {
+        $this->setExpectedException( 'Exception' );
+        $form = (new FormHelper);
+        $form->addField('username')
+            ->addFilter('login', FILTER_SANITIZE_STRING);
+    }
+
+    public function testException_UnknownField_Options()
+    {
+        $this->setExpectedException( 'Exception' );
+        $form = (new FormHelper);
+        $form->addField('username')
+            ->addFilter('username', FILTER_VALIDATE_REGEXP)
+            ->setFilterOptions('login', FILTER_VALIDATE_REGEXP, ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
+    }
+
+    public function testException_UnknownFilter()
+    {
+        $this->setExpectedException( 'Exception' );
+        $form = (new FormHelper);
+        $form->addField('username')
+            ->setFilterOptions('username', FILTER_VALIDATE_REGEXP, ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
+    }
 }
