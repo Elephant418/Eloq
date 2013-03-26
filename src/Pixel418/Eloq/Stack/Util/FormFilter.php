@@ -113,6 +113,7 @@ class FormFilter
             $id = filter_id($id);
         }
         return function (&$field) use ($id, $options) {
+            $options=array('options'=>$options);
             if ($id === FILTER_VALIDATE_BOOLEAN) {
                 $options['flags'] = FILTER_NULL_ON_FAILURE;
             }

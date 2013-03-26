@@ -216,4 +216,26 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
         $this->assertFalse($form->get('entry'), 'Valid boolean entry is converted');
     }
+
+    public function testPHPfilter_Regexp_Ok()
+    {
+        $someBoolean = 'coco';
+        $_POST['entry'] = $someBoolean;
+        $form = (new FormHelper);
+        $form->addField('entry')
+            ->addFilter('entry', FILTER_VALIDATE_REGEXP, 'Error', ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
+        $this->assertTrue($form->isActive(), 'Form is detected as active');
+        $this->assertTrue($form->isValid(), 'Form is detected as valid');
+    }
+
+    public function testPHPfilter_Regexp_Nok()
+    {
+        $someBoolean = 'côcô';
+        $_POST['entry'] = $someBoolean;
+        $form = (new FormHelper);
+        $form->addField('entry')
+            ->addFilter('entry', FILTER_VALIDATE_REGEXP, 'Error', ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
+        $this->assertTrue($form->isActive(), 'Form is detected as active');
+        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
+    }
 }
