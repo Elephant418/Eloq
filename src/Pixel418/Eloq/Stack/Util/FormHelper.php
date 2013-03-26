@@ -200,6 +200,7 @@ class FormHelper
                 $value =& $this->values[$fieldName];
                 if (!$filter->call($value)) {
                     $this->errors[$fieldName][$filterName] = $filter->getError();
+                    break;
                 }
             }
         }
