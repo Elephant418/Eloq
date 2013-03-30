@@ -11,6 +11,7 @@ class FormHelper
     /*************************************************************************
     ATTIBUTES
      *************************************************************************/
+    protected $type;
     protected $fields = array();
     protected $values = array();
     protected $filters = array();
@@ -18,6 +19,19 @@ class FormHelper
     protected $isTreated = FALSE;
     protected $isActive = FALSE;
 
+
+    /*************************************************************************
+    FIELD METHODS
+     *************************************************************************/
+    public function __construct($type = INPUT_POST)
+    {
+        $this->setType($type);
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
+    }
 
     /*************************************************************************
     FIELD METHODS
@@ -169,10 +183,11 @@ class FormHelper
         if ($this->isTreated) {
             return NULL;
         }
+        $values = filter_input_array($this->type);
         foreach ($this->fields as $name => $path) {
-            if (\UArray::hasDeepSelector($_POST, $path)) {
+            if (\UArray::hasDeepSelector($values, $path)) {
                 $this->isActive = TRUE;
-                $value = \UArray::getDeepSelector($_POST, $path);
+                $value = \UArray::getDeepSelector($values, $path);
                 $this->values[$name] = $value;
             }
         }
