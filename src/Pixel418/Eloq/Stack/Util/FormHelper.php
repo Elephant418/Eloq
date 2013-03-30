@@ -31,6 +31,13 @@ class FormHelper
     public function setType($type)
     {
         $this->type = $type;
+        return $this;
+    }
+
+    public function setValues($values)
+    {
+        $this->values = $values;
+        return $this;
     }
 
     /*************************************************************************
@@ -42,7 +49,6 @@ class FormHelper
             $address = $name;
         }
         $this->fields[$name] = $address;
-        $this->values[$name] = NULL;
         $this->filters[$name] = array();
         return $this;
     }
@@ -50,7 +56,6 @@ class FormHelper
     public function removeField($name)
     {
         unset($this->fields[$name]);
-        unset($this->values[$name]);
         unset($this->filters[$name]);
         return $this;
     }
@@ -183,12 +188,19 @@ class FormHelper
         if ($this->isTreated) {
             return NULL;
         }
-        $values = filter_input_array($this->type);
+        if (empty($this->values)) {
+            $values = filter_input_array($this->type);
+        } else {
+            $values = $this->values;
+            $this->values = array();
+        }
         foreach ($this->fields as $name => $path) {
             if (\UArray::hasDeepSelector($values, $path)) {
                 $this->isActive = TRUE;
                 $value = \UArray::getDeepSelector($values, $path);
                 $this->values[$name] = $value;
+            } else {
+                $this->values[$name] = NULL;
             }
         }
     }

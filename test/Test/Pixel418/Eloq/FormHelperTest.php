@@ -21,7 +21,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
     public function testInactiveForm()
     {
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addField('password');
         $this->assertFalse($form->isActive());
     }
@@ -31,7 +32,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $_POST['username'] = 'tzi';
         $_POST['password'] = 'secret';
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addField('password');
         $this->assertTrue($form->isActive());
     }
@@ -41,7 +43,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = 'tzi';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addField('password');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
@@ -60,7 +63,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = 'tzi';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addField('password')
             ->addFilter('password', 'required');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
@@ -75,7 +79,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $_POST['username'] = $username;
         $_POST['password'] = '';
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addField('password')
             ->addFilter('password', 'required');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
@@ -91,7 +96,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $_POST['username'] = $username;
         $_POST['password'] = $password;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addField('password')
             ->addFilter('password', 'required');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
@@ -109,7 +115,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = '1234567890123456';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', 'max_length', 'Too long', array('length' => 15));
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
@@ -121,7 +128,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = '1234567890123456';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', 'max_length', 'Too long', array('length' => 16));
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as invalid');
@@ -133,7 +141,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = '1234567890123456';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', 'min_length', 'Too short', array('length' => 17));
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
@@ -145,7 +154,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = '1234567890123456';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', 'min_length', 'Too short', array('length' => 16));
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as invalid');
@@ -161,7 +171,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = 'tzi<script>';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', FILTER_SANITIZE_STRING);
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
@@ -173,7 +184,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = 'tzi<script>';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', 'string');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
@@ -185,7 +197,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = 'tzi';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', 'validate_email');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
@@ -198,7 +211,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $username = 'tzi@domain.tld';
         $_POST['username'] = $username;
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', 'validate_email');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
@@ -210,7 +224,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $someBoolean = '0';
         $_POST['entry'] = $someBoolean;
         $form = (new FormHelper);
-        $form->addField('entry')
+        $form->setValues( $_POST )
+            ->addField('entry')
             ->addFilter('entry', 'boolean');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
@@ -222,7 +237,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $someBoolean = 'coco';
         $_POST['entry'] = $someBoolean;
         $form = (new FormHelper);
-        $form->addField('entry')
+        $form->setValues( $_POST )
+            ->addField('entry')
             ->addFilter('entry', FILTER_VALIDATE_REGEXP, 'Error', ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertTrue($form->isValid(), 'Form is detected as valid');
@@ -233,7 +249,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
         $someBoolean = 'côcô';
         $_POST['entry'] = $someBoolean;
         $form = (new FormHelper);
-        $form->addField('entry')
+        $form->setValues( $_POST )
+            ->addField('entry')
             ->addFilter('entry', FILTER_VALIDATE_REGEXP, 'Error', ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
@@ -247,7 +264,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException( 'Exception' );
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('login', FILTER_SANITIZE_STRING);
     }
 
@@ -255,7 +273,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException( 'Exception' );
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->addFilter('username', FILTER_VALIDATE_REGEXP)
             ->setFilterOptions('login', FILTER_VALIDATE_REGEXP, ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
     }
@@ -264,7 +283,8 @@ class FormHelperTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException( 'Exception' );
         $form = (new FormHelper);
-        $form->addField('username')
+        $form->setValues( $_POST )
+            ->addField('username')
             ->setFilterOptions('username', FILTER_VALIDATE_REGEXP, ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
     }
 }
