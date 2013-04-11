@@ -4,7 +4,7 @@
 
 namespace Pixel418\Eloq\Stack\Util;
 
-class FormFilter
+class FormInputFilter
 {
 
 
@@ -21,7 +21,7 @@ class FormFilter
     /*************************************************************************
     CONSTRUCTOR METHODS
      *************************************************************************/
-    public function __construct($name, $error, $options)
+    public function __construct($name)
     {
         if (!static::$isInitialized) {
             $this->initializeExistingFilters();

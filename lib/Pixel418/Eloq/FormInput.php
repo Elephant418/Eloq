@@ -4,6 +4,6 @@
 
 namespace Pixel418\Eloq;
 
-class FormHelper extends \Pixel418\Eloq\Stack\Util\FormHelper
+class FormInput extends \Pixel418\Eloq\Stack\Util\FormInput
 {
 }

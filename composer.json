@@ -18,7 +18,7 @@
     },
     "autoload": {
         "psr-0": {
-            "Pixel418\\Eloq": "src/",
+            "Pixel418\\Eloq": "lib/",
             "Test\\Pixel418\\Eloq": "test/"
         }
     }

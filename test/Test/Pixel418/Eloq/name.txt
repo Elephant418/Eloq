@@ -1,0 +1,64 @@
+
+Balon Greyjoy
+Yara Greyjoy
+Talisa Maegyr
+Olenna Tyrell
+Margaery Tyrell
+Mance Raider
+Brienne de Torth
+Xaro Xhoan Daxos
+Ygritte
+Jaqen H’ghar
+Craster
+Davos Mervault
+Mélisandre d’Asshaï
+Stannis Baratheon
+Samwell tarly
+Alliser thorne
+Osha
+lord Commandant Mormont
+Mirri Maz Duur
+Tywin Lannister
+Gendry
+syrio forel
+Gregor Clegane
+Bronn
+Mestre Aemon
+Tyrion Lannister
+Jaime Lannister
+Lancel Lannister
+Janos Slynt
+Sandor Clegane
+Barristan Selmy
+Varys
+Petyr Baelish
+Mestre Pycelle
+Tommen Baratheon
+Myrcella Baratheon
+Joffrey Baratheon
+Renly Baratheon
+Cersei Lannister
+Robert Baratheon
+Loras Tyrell
+Robin Arryn
+Lysa Arryn
+Hodor
+Septa Mordane
+Rodrik Cassel
+Jory Cassel
+Mestre Luwin
+Theon Greyjoy
+Rickon Stark
+Bran Stark
+Arya Stark
+Sansa Stark
+Robb Stark
+Catelyn Stark
+Benjen Stark
+Jon Snow
+Illyrio
+Ser Jorah Mormont
+Viserys Targaryen
+Daenerys Targaryen
+Khal Drogo
+Eddard Stark
