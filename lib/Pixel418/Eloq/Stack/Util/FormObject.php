@@ -29,20 +29,6 @@ class FormObject
 
 
     /*************************************************************************
-    INPUT GETTER METHODS
-     *************************************************************************/
-    public function getPopulation(int $populationType=NULL){
-        if (is_null($populationType)) {
-            $populationType = $this->populationType;
-        }
-        if ($populationType==self::INPUT_ARRAY) {
-            return $this->population;
-        }
-        return filter_input_array($populationType);
-    }
-
-
-    /*************************************************************************
     SETTER METHODS
      *************************************************************************/
     public function setPopulationType($populationType)
@@ -66,7 +52,6 @@ class FormObject
         if (!is_a($input, $inputClass)) {
             throw new \Exception('Wrong input type: '.get_class($input).' expected '.$inputClass);
         }
-        $input->setFormObject($this);
         $this->inputs[$input->getName()] = $input;
         return $this;
     }
@@ -81,8 +66,20 @@ class FormObject
     /*************************************************************************
     GETTER METHODS
      *************************************************************************/
+    public function treat()
+    {
+        if(!$this->isTreated) {
+            foreach ($this->inputs as $input) {
+                $input->treat($this);
+            }
+            $this->isTreated = TRUE;
+        }
+        return $this;
+    }
+
     public function isActive()
     {
+        $this->treat();
         foreach ($this->inputs as $input) {
             if ($input->isActive()) {
                 return TRUE;
@@ -93,6 +90,7 @@ class FormObject
 
     public function isValid()
     {
+        $this->treat();
         foreach ($this->inputs as $input) {
             if (!$input->isValid()) {
                 return FALSE;
@@ -112,5 +110,19 @@ class FormObject
             return FALSE;
         }
         return $this->inputs[$name];
+    }
+
+
+    /*************************************************************************
+    INPUT GETTER METHODS
+     *************************************************************************/
+    public function getPopulation(int $populationType=NULL){
+        if (is_null($populationType)) {
+            $populationType = $this->populationType;
+        }
+        if ($populationType==self::INPUT_ARRAY) {
+            return $this->population;
+        }
+        return filter_input_array($populationType);
     }
 }

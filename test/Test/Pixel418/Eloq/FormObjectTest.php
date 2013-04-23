@@ -80,6 +80,7 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
     public function testInactiveForm_NoValues()
     {
         $form = $this->getLoginForm();
+        $form->treat();
         $this->assertNull($form->username->getValue(), 'Input has a NULL value');
         $this->assertNull($form->username->getError(), 'Input has a no error');
     }
@@ -88,6 +89,7 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
     {
         $defaultValue = 'thorosdemyr';
         $form = $this->getLoginForm();
+        $form->treat();
         $form->username->setDefaultValue($defaultValue);
         $this->assertEquals($defaultValue, $form->username->getValue(), 'Input has the default value');
         $this->assertNull($form->username->getError(), 'Input has a no error');
@@ -98,6 +100,7 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
         $username = 'bericdondarrion';
         $form = $this->getLoginForm()
             ->setPopulation(['username'=>$username]);
+        $form->treat();
         $this->assertEquals($username, $form->username->getValue(), 'Input has the fetch value');
         $this->assertEquals($username, (string) $form->username, 'Input could be catch as string');
         $this->assertNull($form->username->getError(), 'Input has a no error');

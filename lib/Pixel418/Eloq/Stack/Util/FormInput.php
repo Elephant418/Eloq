@@ -11,7 +11,6 @@ class FormInput
     /*************************************************************************
     ATTRIBUTES
      *************************************************************************/
-    protected $formObject;
     protected $name;
     protected $populationType;
     protected $address;
@@ -29,12 +28,6 @@ class FormInput
     public function __construct($name)
     {
         $this->name = $name;
-    }
-
-    public function setFormObject(FormObject $formObject)
-    {
-        $this->formObject = $formObject;
-        return $this;
     }
 
     public function getName()
@@ -77,20 +70,40 @@ class FormInput
     /*************************************************************************
     RESULT METHODS
      *************************************************************************/
+    public function treat($formObject)
+    {
+        if ($this->isTreated) {
+            return NULL;
+        }
+        $this->initFetchValue($formObject);
+        $this->isTreated = TRUE;
+        if (!$this->isActive) {
+            return NULL;
+        }
+        $this->validFetchValue();
+    }
+
     public function isActive()
     {
-        $this->treat();
+        if (!$this->isTreated) {
+            throw new \RuntimeException('Try to get the state of an untreat form');
+        }
         return $this->isActive;
     }
 
     public function isValid()
     {
+        if (!$this->isTreated) {
+            throw new \RuntimeException('Try to get the state of an untreat form');
+        }
         return is_null($this->error);
     }
 
     public function getValue()
     {
-        $this->treat();
+        if (!$this->isTreated) {
+            throw new \RuntimeException('Try to get the state of an untreat form');
+        }
         if (!is_null($this->fetchValue)) {
             return $this->fetchValue;
         }
@@ -111,22 +124,9 @@ class FormInput
     /*************************************************************************
     PRIVATE METHODS
      *************************************************************************/
-    protected function treat()
+    protected function initFetchValue($formObject)
     {
-        if ($this->isTreated) {
-            return NULL;
-        }
-        $this->initFetchValue();
-        $this->isTreated = TRUE;
-        if (!$this->isActive) {
-            return NULL;
-        }
-        $this->validFetchValue();
-    }
-
-    protected function initFetchValue()
-    {
-        $population = $this->getPopulation();
+        $population = $this->getPopulation($formObject);
         $address = $this->getAddress();
         if (\UArray::hasDeepSelector($population, $address)) {
             $this->isActive = TRUE;
@@ -144,9 +144,9 @@ class FormInput
         }
     }
 
-    protected function getPopulation()
+    protected function getPopulation($formObject)
     {
-        return $this->formObject->getPopulation($this->populationType);
+        return $formObject->getPopulation($this->populationType);
     }
 
     protected function getAddress()
