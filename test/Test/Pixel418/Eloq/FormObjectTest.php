@@ -4,9 +4,9 @@ namespace Test\Pixel418\Eloq;
 
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-use Pixel418\Eloq\FormObject as FormObject;
-use Pixel418\Eloq\FormInput as FormInput;
-use Pixel418\Eloq\FormInputFilter as FormInputFilter;
+use Pixel418\Eloq\Stack\Util\FormObject as FormObject;
+use Pixel418\Eloq\Stack\Util\FormInput as FormInput;
+use Pixel418\Eloq\Stack\Util\FormInputFilter as FormInputFilter;
 
 echo 'Eloq ' . \Pixel418\Eloq::VERSION . ' tested with ';
 
