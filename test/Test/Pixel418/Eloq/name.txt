@@ -1,11 +1,6 @@
 
 
-Xaro Xhoan Daxos
-Ygritte
-Jaqen H’ghar
-Craster
-Davos Mervault
-Mélisandre d’Asshaï
+
 Stannis Baratheon
 Samwell tarly
 Alliser thorne

@@ -30,9 +30,9 @@ class FormInputFilter
             $option = \UString::substrAfterLast($name, ':');
             \UString::doSubstrBeforeLast($name, ':');
         }
-        if ($this->isPHPFilter($name)) {
+        if ($PHPFilterName = $this->getPHPFilterName($name)) {
             $this->isPHPFilter = TRUE;
-            $name = $this->getPHPFilterName($name);
+            $name = $PHPFilterName;
         }
         $this->name = $name;
         $this->setOption($option);
@@ -86,17 +86,6 @@ class FormInputFilter
 
     /* PROTECTED METHODS
      *************************************************************************/
-    protected function isPHPFilter(&$name)
-    {
-        if (is_string($name)) {
-            return (filter_id($name) !== FALSE);
-        }
-        if (is_int($name)) {
-            return ($this->getPHPFilterName($name) !== FALSE);
-        }
-        return FALSE;
-    }
-
     protected function getPHPFilterName($id)
     {
         foreach (filter_list() as $name) {
@@ -104,7 +93,10 @@ class FormInputFilter
                 return $name;
             }
         }
-        return FALSE;
+        if (filter_id($id) === FALSE) {
+            return FALSE;
+        }
+        return $id;
     }
 
 
@@ -114,9 +106,10 @@ class FormInputFilter
     {
         static::addFilterDefinition('required', array($this, 'filterRequired'));
         static::addFilterDefinition('boolean', array($this, 'filterBoolean'));
+        static::addFilterDefinition('validate_regexp', array($this, 'filterValidateRegexp'));
         static::addFilterDefinition('php', array($this, 'filterPHP'));
-        static::addFilterDefinition('maxLength', array($this, 'filterMaxLength'));
-        static::addFilterDefinition('minLength', array($this, 'filterMinLength'));
+        static::addFilterDefinition('max_length', array($this, 'filterMaxLength'));
+        static::addFilterDefinition('min_length', array($this, 'filterMinLength'));
         static::$isInitialized = TRUE;
     }
 
@@ -132,6 +125,19 @@ class FormInputFilter
     {
         return function (&$field) use ($name) {
             $filtered = filter_var($field, filter_id($name));
+            if ($filtered === FALSE) {
+                return FALSE;
+            }
+            $field = $filtered;
+            return TRUE;
+        };
+    }
+
+    public static function filterValidateRegexp($regexp)
+    {
+        return function (&$field) use ($regexp) {
+            $options = ['options'=>['regexp' => $regexp]];
+            $filtered = filter_var($field, FILTER_VALIDATE_REGEXP, $options);
             if ($filtered === FALSE) {
                 return FALSE;
             }

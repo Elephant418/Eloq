@@ -136,17 +136,17 @@ class FormTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'margaery.tyrell'; // username length: 15
         $form = $this->getLoginForm()
-            ->addInputFilter('username', 'maxLength:14');
+            ->addInputFilter('username', 'max_length:14');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
-        $this->assertEquals('maxLength', $form->getInputError('username'), 'One error must be thrown, the username field must be too long');
+        $this->assertEquals('max_length', $form->getInputError('username'), 'One error must be thrown, the username field must be too long');
     }
 
     public function testMaxLengthEntry_Ok()
     {
         $_POST['username'] = 'olenna.tyrell'; // username length: 13
         $form = $this->getLoginForm()
-            ->addInputFilter('username', 'maxLength:13');
+            ->addInputFilter('username', 'max_length:13');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertNull($form->getInputError('username'), 'No error must be thrown');
@@ -156,17 +156,17 @@ class FormTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'mance.raider'; // username length: 12
         $form = $this->getLoginForm()
-            ->addInputFilter('username', 'minLength:13');
+            ->addInputFilter('username', 'min_length:13');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
-        $this->assertEquals('minLength', $form->getInputError('username'), 'One error must be thrown, the username field must be too short');
+        $this->assertEquals('min_length', $form->getInputError('username'), 'One error must be thrown, the username field must be too short');
     }
 
     public function testMinLengthEntry_Ok()
     {
         $_POST['username'] = 'brienne.de.torth'; // username length: 16
         $form = $this->getLoginForm()
-            ->addInputFilter('username', 'minLength:16');
+            ->addInputFilter('username', 'min_length:16');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertNull($form->getInputError('username'), 'No error must be thrown');
@@ -176,94 +176,83 @@ class FormTest extends \PHPUnit_Framework_TestCase
     /*************************************************************************
     PHP FILTER TEST METHODS
      *************************************************************************/
- /*   public function testPHPfilter_SanitizeStripTag_AsId()
+    public function testPHPfilter_SanitizeStripTag_AsId()
     {
-        $username = 'tzi<script>';
-        $_POST['username'] = $username;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', FILTER_SANITIZE_STRING);
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals('tzi', $form->get('username'), 'Sanitize script tag');
+        $username = 'xaro.xhoan.daxos';
+        $_POST['username'] = $username.'<script>';
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', FILTER_SANITIZE_STRING);
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals($username, $form->getInputValue('username'), 'The username input must be sanitized');
+        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 
     public function testPHPfilter_SanitizeStripTag_AsName()
     {
-        $username = 'tzi<script>';
-        $_POST['username'] = $username;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', 'string');
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals('tzi', $form->get('username'), 'Sanitize script tag');
+        $username = 'ygritte';
+        $_POST['username'] = '<script>'.$username;
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'string');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals($username, $form->getInputValue('username'), 'The username input must be sanitized');
+        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 
     public function testPHPfilter_ValidateEmail_Nok()
     {
-        $username = 'tzi';
-        $_POST['username'] = $username;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', 'validate_email');
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
-        $this->assertEquals('tzi', $form->get('username'), 'Non-valid email form entry is intact');
-        $this->assertEquals(1, count($form->getErrors('username')), 'One error message for non-valid email entry');
+        $_POST['username'] = 'jaqen.h-ghar';
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'validate_email');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must not be valid');
+        $this->assertEquals($_POST['username'], $form->getInputValue('username'), 'The invalid email must be intact');
+        $this->assertEquals('validate_email', $form->getInputError('username'), 'One error must be thrown, the username field must not be a valid email');
     }
 
     public function testPHPfilter_ValidateEmail_Ok()
     {
-        $username = 'tzi@domain.tld';
-        $_POST['username'] = $username;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', 'validate_email');
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals($username, $form->get('username'), 'Valid form entry is kept');
+        $_POST['username'] = 'craster@freefolk.north';
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'validate_email');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
+        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 
     public function testPHPfilter_ValidateBoolean()
     {
-        $someBoolean = '0';
-        $_POST['entry'] = $someBoolean;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('entry')
-            ->addFilter('entry', 'boolean');
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertFalse($form->get('entry'), 'Valid boolean entry is converted');
+        $_POST['username'] = '0';
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'boolean');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertFalse($form->username, 'The given entry must be a false boolean');
+        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 
     public function testPHPfilter_Regexp_Ok()
     {
-        $someBoolean = 'coco';
-        $_POST['entry'] = $someBoolean;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('entry')
-            ->addFilter('entry', FILTER_VALIDATE_REGEXP, 'Error', ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertTrue($form->isValid(), 'Form is detected as valid');
+        $_POST['username'] = 'davos.mervault';
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
+        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 
     public function testPHPfilter_Regexp_Nok()
     {
-        $someBoolean = 'côcô';
-        $_POST['entry'] = $someBoolean;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('entry')
-            ->addFilter('entry', FILTER_VALIDATE_REGEXP, 'Error', ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
+        $_POST['username'] = 'mélisandre d’asshaï';
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must be invalid');
+        $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
+        $this->assertEquals('validate_regexp', $form->getInputError('username'), 'One error must be thrown, the username field must not respect the regexp');
     }
 
 
