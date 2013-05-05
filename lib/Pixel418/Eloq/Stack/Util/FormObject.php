@@ -8,28 +8,26 @@ class FormObject
 {
 
 
-    /*************************************************************************
-    ATTRIBUTES
+    /* ATTRIBUTES
      *************************************************************************/
     const INPUT_ARRAY = 0;
     private $namespace;
+    protected $population;
     protected $populationType;
     protected $inputs = array();
     protected $isTreated = FALSE;
 
 
-    /*************************************************************************
-    CONSTRUCTOR METHODS
+    /* CONSTRUCTOR
      *************************************************************************/
     public function __construct($populationType = INPUT_POST)
     {
         $this->setPopulationType($populationType);
-        $this->namesapce = \UObject::getNamespace( $this );
+        $this->namespace = \UObject::getNamespace($this);
     }
 
 
-    /*************************************************************************
-    SETTER METHODS
+    /* SETTER METHODS
      *************************************************************************/
     public function setPopulationType($populationType)
     {
@@ -38,41 +36,53 @@ class FormObject
     }
 
     public function setPopulation(array $population){
-        $this->populationType = self::INPUT_ARRAY;
+        $this->setPopulationType(self::INPUT_ARRAY);
         $this->population = $population;
         return $this;
     }
 
-    public function addInput($input)
+    public function addInput($name, $address=NULL, $populationType=NULL)
     {
-        $inputClass = $this->namesapce.'\\FormInput';
-        if (is_string($input)) {
-            $input = new $inputClass($input);
+        $inputClass = $this->namespace.'\\FormInput';
+        $input = new $inputClass($name);
+        $this->inputs[$name] = $input;
+        if ($address) {
+            $this->setInputAddress($name, $address, $populationType);
         }
-        if (!is_a($input, $inputClass)) {
-            throw new \Exception('Wrong input type: '.get_class($input).' expected '.$inputClass);
-        }
-        $this->inputs[$input->getName()] = $input;
         return $this;
     }
 
-    public function removeInput(string $name)
+    public function removeInput($name)
     {
         unset($this->inputs[$name]);
         return $this;
     }
 
+    public function setInputAddress($name, $address, $populationType=NULL) {
+        $input = $this->getInput($name);
+        $input->address = $address;
+        $input->populationType = $populationType;
+        return $this;
+    }
 
-    /*************************************************************************
-    GETTER METHODS
+    public function setInputDefaultValue($name, $defaultValue) {
+        $input = $this->getInput($name);
+        $input->defaultValue = $defaultValue;
+        return $this;
+    }
+
+
+    /* TREATMENTS METHODS
      *************************************************************************/
     public function treat()
     {
         if(!$this->isTreated) {
-            foreach ($this->inputs as $input) {
-                $input->treat($this);
-            }
+            $population = $this->getPopulation();
+            $this->initFetchValues($population);
             $this->isTreated = TRUE;
+            if ($this->isActive()) {
+                $this->validFetchValues();
+            }
         }
         return $this;
     }
@@ -81,7 +91,7 @@ class FormObject
     {
         $this->treat();
         foreach ($this->inputs as $input) {
-            if ($input->isActive()) {
+            if ($input->isActive) {
                 return TRUE;
             }
         }
@@ -99,24 +109,36 @@ class FormObject
         return TRUE;
     }
 
+
+    /* GETTER METHODS
+     *************************************************************************/
     public function __get($name)
     {
-        return $this->getInput($name);
+        return $this->getInputValue($name);
     }
 
-    public function getInput($name)
+    public function getInputValue($name)
     {
-        if (!isset($this->inputs[$name])) {
-            return FALSE;
-        }
-        return $this->inputs[$name];
+        $input = $this->getInput($name);
+        return $input->getValue();
+    }
+
+    public function getInputError($name){
+        $input = $this->getInput($name);
+        return $input->error;
+    }
+
+    public function isInputValid($name)
+    {
+        $this->treat();
+        $input = $this->getInput($name);
+        return $input->isValid();
     }
 
 
-    /*************************************************************************
-    INPUT GETTER METHODS
+    /* PROTECTED METHODS
      *************************************************************************/
-    public function getPopulation(int $populationType=NULL){
+    protected function getPopulation($populationType=NULL){
         if (is_null($populationType)) {
             $populationType = $this->populationType;
         }
@@ -124,5 +146,27 @@ class FormObject
             return $this->population;
         }
         return filter_input_array($populationType);
+    }
+
+    protected function initFetchValues($population)
+    {
+        foreach ($this->inputs as $input) {
+            $input->initFetchValue($population);
+        }
+    }
+
+    protected function validFetchValues()
+    {
+        foreach ($this->inputs as $input) {
+            $input->validFetchValue();
+        }
+    }
+
+    protected function getInput($name)
+    {
+        if (!isset($this->inputs[$name])) {
+            throw new \RuntimeException('Try to get an unknown input: '.$name);
+        }
+        return $this->inputs[$name];
     }
 }

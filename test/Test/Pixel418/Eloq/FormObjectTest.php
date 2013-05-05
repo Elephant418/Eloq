@@ -16,8 +16,8 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
     public function getLoginForm()
     {
         return (new FormObject)
-            ->addInput(new FormInput('username'))
-            ->addInput(new FormInput('password'));
+            ->addInput('username')
+            ->addInput('password');
     }
 
 
@@ -28,20 +28,6 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
     {
         $form = (new FormObject);
         $this->assertTrue(is_a($form, 'Pixel418\\Eloq\\Stack\\Util\\FormObject'), 'Form must be an object');
-    }
-
-    public function testInputSetByName()
-    {
-        $form = (new FormObject)
-            ->addInput('username');
-        $this->assertTrue(is_a($form->getInput('username'), 'Pixel418\\Eloq\\Stack\\Util\\FormInput'), 'Input must be an object');
-    }
-
-    public function testInputInvalidType()
-    {
-        $this->setExpectedException( 'Exception' );
-        $form = (new FormObject)
-            ->addInput(new \ArrayObject());
     }
 
     public function testEmptyForm()
@@ -81,8 +67,8 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
     {
         $form = $this->getLoginForm();
         $form->treat();
-        $this->assertNull($form->username->getValue(), 'Input has a NULL value');
-        $this->assertNull($form->username->getError(), 'Input has a no error');
+        $this->assertNull($form->username, 'Input has a NULL value');
+        $this->assertNull($form->getInputError('username'), 'Input has no error');
     }
 
     public function testInactiveForm_DefaultValues()
@@ -90,9 +76,9 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
         $defaultValue = 'thorosdemyr';
         $form = $this->getLoginForm();
         $form->treat();
-        $form->username->setDefaultValue($defaultValue);
-        $this->assertEquals($defaultValue, $form->username->getValue(), 'Input has the default value');
-        $this->assertNull($form->username->getError(), 'Input has a no error');
+        $form->setInputDefaultValue('username', $defaultValue);
+        $this->assertEquals($defaultValue, $form->username, 'Input has the default value');
+        $this->assertNull($form->getInputError('username'), 'Input has no error');
     }
 
     public function testActiveForm_FetchValues()
@@ -101,11 +87,10 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
         $form = $this->getLoginForm()
             ->setPopulation(['username'=>$username]);
         $form->treat();
-        $this->assertEquals($username, $form->username->getValue(), 'Input has the fetch value');
-        $this->assertEquals($username, (string) $form->username, 'Input could be catch as string');
-        $this->assertNull($form->username->getError(), 'Input has a no error');
-        $this->assertNull($form->password->getValue(), 'Input has a NULL value');
-        $this->assertNull($form->password->getError(), 'Input has a no error');
+        $this->assertEquals($username, $form->username, 'Input has the fetch value');
+        $this->assertNull($form->getInputError('username'), 'Input has no error');
+        $this->assertNull($form->password, 'Input has a NULL value');
+        $this->assertNull($form->getInputError('password'), 'Input has no error');
     }
 
 

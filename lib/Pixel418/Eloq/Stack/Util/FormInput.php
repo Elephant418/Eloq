@@ -8,133 +8,52 @@ class FormInput
 {
 
 
-    /*************************************************************************
-    ATTRIBUTES
+    /* ATTRIBUTES
      *************************************************************************/
-    protected $name;
-    protected $populationType;
-    protected $address;
-    protected $defaultValue;
-    protected $fetchValue;
-    protected $filters = array();
-    protected $error;
-    protected $isTreated = FALSE;
-    protected $isActive = FALSE;
+    public $populationType;
+    public $address;
+    public $defaultValue;
+    public $fetchValue;
+    public $filters = array();
+    public $error;
+    public $isActive = FALSE;
 
 
-    /*************************************************************************
-    CONSTRUCTOR METHODS
+    /* CONSTRUCTOR METHODS
      *************************************************************************/
     public function __construct($name)
     {
-        $this->name = $name;
-    }
-
-    public function getName()
-    {
-        return $this->name;
+        $this->address = $name;
     }
 
 
-    /*************************************************************************
-    DEFINITION METHODS
+    /* GETTER METHODS
      *************************************************************************/
-    public function setDefaultValue($defaultValue)
-    {
-        $this->defaultValue = $defaultValue;
-        return $this;
-    }
-
-    public function setAddress($address, $populationType=NULL)
-    {
-        $this->address = $address;
-        if (!is_null($populationType)) {
-            $this->populationType = $populationType;
-        }
-        return $this;
-    }
-
-    public function addFilter(FormInputFilter $filter)
-    {
-        $this->filters[$filter->getName()] = $filter;
-        return $this;
-    }
-
-    public function removeFilter($name)
-    {
-        unset($this->filters[$name]);
-        return $this;
-    }
-
-
-    /*************************************************************************
-    RESULT METHODS
-     *************************************************************************/
-    public function treat($formObject)
-    {
-        if ($this->isTreated) {
-            return NULL;
-        }
-        $this->initFetchValue($formObject);
-        $this->isTreated = TRUE;
-        if (!$this->isActive) {
-            return NULL;
-        }
-        $this->validFetchValue();
-    }
-
-    public function isActive()
-    {
-        if (!$this->isTreated) {
-            throw new \RuntimeException('Try to get the state of an untreat form');
-        }
-        return $this->isActive;
-    }
-
-    public function isValid()
-    {
-        if (!$this->isTreated) {
-            throw new \RuntimeException('Try to get the state of an untreat form');
-        }
-        return is_null($this->error);
-    }
-
     public function getValue()
     {
-        if (!$this->isTreated) {
-            throw new \RuntimeException('Try to get the state of an untreat form');
-        }
         if (!is_null($this->fetchValue)) {
             return $this->fetchValue;
         }
         return $this->defaultValue;
     }
 
-    public function __toString()
+    public function isValid()
     {
-        return $this->getValue();
-    }
-
-    public function getError()
-    {
-        return $this->error;
+        return ($this->error == NULL);
     }
 
 
     /*************************************************************************
-    PRIVATE METHODS
+    TREATMENTS METHODS
      *************************************************************************/
-    protected function initFetchValue($formObject)
-    {
-        $population = $this->getPopulation($formObject);
-        $address = $this->getAddress();
-        if (\UArray::hasDeepSelector($population, $address)) {
+    public function initFetchValue($population) {
+        if (\UArray::hasDeepSelector($population, $this->address)) {
             $this->isActive = TRUE;
-            $this->fetchValue = \UArray::getDeepSelector($population, $address);
+            $this->fetchValue = \UArray::getDeepSelector($population, $this->address);
         }
     }
 
-    protected function validFetchValue()
+    public function validFetchValue()
     {
         foreach ($this->filters as $filterName => $filter) {
             if (!$filter->apply($this->fetchValue)) {
@@ -142,18 +61,5 @@ class FormInput
                 break;
             }
         }
-    }
-
-    protected function getPopulation($formObject)
-    {
-        return $formObject->getPopulation($this->populationType);
-    }
-
-    protected function getAddress()
-    {
-        if (!is_null($this->address)) {
-            return $this->address;
-        }
-        return $this->name;
     }
 }
