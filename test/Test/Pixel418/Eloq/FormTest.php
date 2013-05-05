@@ -4,30 +4,27 @@ namespace Test\Pixel418\Eloq;
 
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-use Pixel418\Eloq\Stack\Util\FormObject as FormObject;
-use Pixel418\Eloq\Stack\Util\FormInput as FormInput;
-use Pixel418\Eloq\Stack\Util\FormInputFilter as FormInputFilter;
+use Pixel418\Eloq\Stack\Util\Form;
 
 echo 'Eloq ' . \Pixel418\Eloq::VERSION . ' tested with ';
 
-class FormObjectTest extends \PHPUnit_Framework_TestCase
+class FormTest extends \PHPUnit_Framework_TestCase
 {
 
     public function getLoginForm()
     {
-        return (new FormObject)
+        return (new Form)
             ->addInput('username')
             ->addInput('password');
     }
 
 
-    /*************************************************************************
-    BASIC TEST METHODS
+    /* BASIC TEST METHODS
      *************************************************************************/
     public function testNewInstance()
     {
-        $form = (new FormObject);
-        $this->assertTrue(is_a($form, 'Pixel418\\Eloq\\Stack\\Util\\FormObject'), 'Form must be an object');
+        $form = (new Form);
+        $this->assertTrue(is_a($form, 'Pixel418\\Eloq\\Stack\\Util\\Form'), 'Form must be an object');
     }
 
     public function testEmptyForm()
@@ -60,8 +57,7 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /*************************************************************************
-    FORM INPUT TEST METHODS
+    /* FORM INPUT TEST METHODS
      *************************************************************************/
     public function testInactiveForm_NoValues()
     {
@@ -94,14 +90,13 @@ class FormObjectTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /*************************************************************************
-    REQUIRED TEST METHODS
-     *************************************************************************/
- /*   public function testRequiredEntry_Null()
+    /* REQUIRED TEST METHODS
+     *************************************************************************
+    public function testRequiredEntry_Null()
     {
         $username = 'tzi';
         $_POST['username'] = $username;
-        $form = (new FormHelper);
+        $form = (new Form);
         $form->setValues( $_POST )
             ->addField('username')
             ->addField('password')

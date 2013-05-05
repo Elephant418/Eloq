@@ -4,7 +4,7 @@
 
 namespace Pixel418\Eloq\Stack\Util;
 
-class FormObject
+class Form
 {
 
 
@@ -72,7 +72,7 @@ class FormObject
     }
 
 
-    /* TREATMENTS METHODS
+    /* FORM GETTER METHODS
      *************************************************************************/
     public function treat()
     {
@@ -110,7 +110,7 @@ class FormObject
     }
 
 
-    /* GETTER METHODS
+    /* INPUT GETTER METHODS
      *************************************************************************/
     public function __get($name)
     {
