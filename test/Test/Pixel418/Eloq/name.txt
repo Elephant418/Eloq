@@ -1,11 +1,5 @@
 
-Balon Greyjoy
-Yara Greyjoy
-Talisa Maegyr
-Olenna Tyrell
-Margaery Tyrell
-Mance Raider
-Brienne de Torth
+
 Xaro Xhoan Daxos
 Ygritte
 Jaqen H’ghar

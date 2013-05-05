@@ -15,7 +15,9 @@ class FormTest extends \PHPUnit_Framework_TestCase
     {
         return (new Form)
             ->addInput('username')
-            ->addInput('password');
+            ->addInput('password')
+            // A hack to allow $_POST data simulation
+            ->setPopulation( $_POST );
     }
 
 
@@ -30,28 +32,28 @@ class FormTest extends \PHPUnit_Framework_TestCase
     public function testEmptyForm()
     {
         $form = $this->getLoginForm();
-        $this->assertFalse($form->isActive(), 'Form must inactive');
+        $this->assertFalse($form->isActive(), 'Form must be inactive');
     }
 
     public function testInactiveForm()
     {
-        $form = $this->getLoginForm()
-            ->setPopulation(['unknownEntry'=>'someValue']);
-        $this->assertFalse($form->isActive(), 'Form must inactive');
+        $_POST = ['unknownEntry'=>'someValue'];
+        $form = $this->getLoginForm();
+        $this->assertFalse($form->isActive(), 'Form must be inactive');
     }
 
     public function testActiveFullForm()
     {
-        $form = $this->getLoginForm()
-            ->setPopulation(['username'=>'tzi', 'password'=>'secret']);
+        $_POST = ['username'=>'tzi', 'password'=>'secret'];
+        $form = $this->getLoginForm();
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
     }
 
     public function testActivePartialForm()
     {
-        $form = $this->getLoginForm()
-            ->setPopulation(['username'=>'roosebolton']);
+        $_POST['username'] = 'roose.bolton';
+        $form = $this->getLoginForm();
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
     }
@@ -69,7 +71,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
 
     public function testInactiveForm_DefaultValues()
     {
-        $defaultValue = 'thorosdemyr';
+        $defaultValue = 'thoros.de.myr';
         $form = $this->getLoginForm();
         $form->treat();
         $form->setInputDefaultValue('username', $defaultValue);
@@ -79,11 +81,10 @@ class FormTest extends \PHPUnit_Framework_TestCase
 
     public function testActiveForm_FetchValues()
     {
-        $username = 'bericdondarrion';
-        $form = $this->getLoginForm()
-            ->setPopulation(['username'=>$username]);
+        $_POST['username'] = 'beric.dondarrion';
+        $form = $this->getLoginForm();
         $form->treat();
-        $this->assertEquals($username, $form->username, 'Input has the fetch value');
+        $this->assertEquals($_POST['username'], $form->username, 'Input has the fetch value');
         $this->assertNull($form->getInputError('username'), 'Input has no error');
         $this->assertNull($form->password, 'Input has a NULL value');
         $this->assertNull($form->getInputError('password'), 'Input has no error');
@@ -91,109 +92,84 @@ class FormTest extends \PHPUnit_Framework_TestCase
 
 
     /* REQUIRED TEST METHODS
-     *************************************************************************
+     *************************************************************************/
     public function testRequiredEntry_Null()
     {
-        $username = 'tzi';
-        $_POST['username'] = $username;
-        $form = (new Form);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addField('password')
-            ->addFilter('password', 'required');
+        $_POST['username'] = 'balon.greyjoy';
+        $form = $this->getLoginForm()
+            ->addInputFilter('password', 'required');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
-        $this->assertNull($form->get('password'), 'Non-existing form entry is null');
-        $this->assertEquals(1, count($form->getErrors('password')), 'One error message for required entry');
+        $this->assertNull($form->password, 'Non-existing form entry is null');
+        $this->assertEquals('required', $form->getInputError('password'), 'One error must be thrown, the password field must be required');
     }
 
     public function testRequiredEntry_Empty()
     {
-        $username = 'tzi';
-        $_POST['username'] = $username;
+        $_POST['username'] = 'yara.greyjoy';
         $_POST['password'] = '';
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addField('password')
-            ->addFilter('password', 'required');
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
-        $this->assertEquals('', $form->get('password'), 'Required form entry is intact');
-        $this->assertEquals(1, count($form->getErrors('password')), 'One error message for required entry');
+        $form = $this->getLoginForm()
+            ->addInputFilter('password', 'required');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must be invalid');
+        $this->assertEquals('', $form->password, 'The password fetched value must be an empty string');
+        $this->assertEquals('required', $form->getInputError('password'), 'One error must be thrown, the password field must be required');
     }
 
     public function testRequiredEntry_Given()
     {
-        $username = 'tzi';
-        $password = 'secret';
-        $_POST['username'] = $username;
-        $_POST['password'] = $password;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addField('password')
-            ->addFilter('password', 'required');
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertTrue($form->isValid(), 'Form is detected as valid');
-        $this->assertEquals($password, $form->get('password'), 'Existing required entry');
-        $this->assertEquals(array(), $form->getErrors('password'), 'No error message for required entry');
+        $_POST['username'] = 'talisa.maegyr';
+        $_POST['password'] = 'secret';
+        $form = $this->getLoginForm()
+            ->addInputFilter('password', 'required');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals($_POST['password'], $form->password, 'The password fetched value must be the given string');
+        $this->assertNull($form->getInputError('password'), 'No error must be thrown');
     }
 
 
     /*************************************************************************
     MAX & MIN LENGTH TEST METHODS
      *************************************************************************/
- /*   public function testMaxLengthEntry_Nok()
+    public function testMaxLengthEntry_Nok()
     {
-        $username = '1234567890123456';
-        $_POST['username'] = $username;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', 'max_length', 'Too long', array('length' => 15));
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
-        $this->assertEquals(1, count($form->getErrors('username')), 'One error message for too long entry');
+        $_POST['username'] = 'margaery.tyrell'; // username length: 15
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'maxLength:14');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must be invalid');
+        $this->assertEquals('maxLength', $form->getInputError('username'), 'One error must be thrown, the username field must be too long');
     }
 
     public function testMaxLengthEntry_Ok()
     {
-        $username = '1234567890123456';
-        $_POST['username'] = $username;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', 'max_length', 'Too long', array('length' => 16));
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertTrue($form->isValid(), 'Form is detected as invalid');
-        $this->assertEquals(0, count($form->getErrors('v')), 'No error message for too long entry');
+        $_POST['username'] = 'olenna.tyrell'; // username length: 13
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'maxLength:13');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 
     public function testMinLengthEntry_Nok()
     {
-        $username = '1234567890123456';
-        $_POST['username'] = $username;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', 'min_length', 'Too short', array('length' => 17));
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
-        $this->assertEquals(1, count($form->getErrors('username')), 'One error message for short long entry');
+        $_POST['username'] = 'mance.raider'; // username length: 12
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'minLength:13');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must be invalid');
+        $this->assertEquals('minLength', $form->getInputError('username'), 'One error must be thrown, the username field must be too short');
     }
 
     public function testMinLengthEntry_Ok()
     {
-        $username = '1234567890123456';
-        $_POST['username'] = $username;
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', 'min_length', 'Too short', array('length' => 16));
-        $this->assertTrue($form->isActive(), 'Form is detected as active');
-        $this->assertTrue($form->isValid(), 'Form is detected as invalid');
-        $this->assertEquals(0, count($form->getErrors('v')), 'No error message for too short entry');
+        $_POST['username'] = 'brienne.de.torth'; // username length: 16
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'minLength:16');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 
 

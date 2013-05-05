@@ -27,7 +27,7 @@ class Form
     }
 
 
-    /* SETTER METHODS
+    /* FORM SETTER METHODS
      *************************************************************************/
     public function setPopulationType($populationType)
     {
@@ -58,6 +58,9 @@ class Form
         return $this;
     }
 
+
+    /* INPUT SETTER METHODS
+     *************************************************************************/
     public function setInputAddress($name, $address, $populationType=NULL) {
         $input = $this->getInput($name);
         $input->address = $address;
@@ -68,6 +71,41 @@ class Form
     public function setInputDefaultValue($name, $defaultValue) {
         $input = $this->getInput($name);
         $input->defaultValue = $defaultValue;
+        return $this;
+    }
+
+
+    /* FILTER SETTER METHODS
+     *************************************************************************/
+    public function setInputFilter($name, $filters)
+    {
+        $input = $this->getInput($name);
+        $input->filters = [];
+        $this->addInputFilter($name, $filters);
+        return $this;
+    }
+
+    public function addInputFilter($name, $filters)
+    {
+        $input = $this->getInput($name);
+        $filterClass = $this->namespace.'\\FormInputFilter';
+        $filters = explode('|',$filters);
+        foreach ($filters as $name) {
+            $filter = new $filterClass($name);
+            $input->filters[$filter->getName()] = $filter;
+        }
+        return $this;
+    }
+
+    public function removeInputFilter($name, $filters)
+    {
+        $input = $this->getInput($name);
+        $filterClass = $this->namespace.'\\FormInputFilter';
+        $filters = explode('|',$filters);
+        foreach ($filters as $name) {
+            $filter = new $filterClass($name);
+            unset( $input->filters[$filter->getName()] );
+        }
         return $this;
     }
 

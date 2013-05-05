@@ -8,120 +8,131 @@ class FormInputFilter
 {
 
 
-    /*************************************************************************
-    ATTRIBUTES
+    /* ATTRIBUTES
      *************************************************************************/
     static $filters = array();
     static $isInitialized = FALSE;
     protected $name;
+    protected $isPHPFilter = FALSE;
+    protected $option;
     protected $callback;
-    protected $error;
 
 
-    /*************************************************************************
-    CONSTRUCTOR METHODS
+    /* CONSTRUCTOR METHODS
      *************************************************************************/
     public function __construct($name)
     {
         if (!static::$isInitialized) {
             $this->initializeExistingFilters();
         }
+        $option = NULL;
+        if (\UString::has($name, ':')) {
+            $option = \UString::substrAfterLast($name, ':');
+            \UString::doSubstrBeforeLast($name, ':');
+        }
+        if ($this->isPHPFilter($name)) {
+            $this->isPHPFilter = TRUE;
+            $name = $this->getPHPFilterName($name);
+        }
         $this->name = $name;
-        $this->setError($error);
-        $this->setOptions($options);
+        $this->setOption($option);
     }
 
 
-    /*************************************************************************
-    STATIC METHODS
+    /* SETTER METHODS
      *************************************************************************/
-    public function initializeExistingFilters()
+    public function setOption($option)
     {
-        static::addCustomFilter('required', array($this, 'filterRequired'));
-        static::addCustomFilter('max_length', array($this, 'filterMaxLength'));
-        static::addCustomFilter('min_length', array($this, 'filterMinLength'));
-        static::$isInitialized = TRUE;
+        if ($this->isPHPFilter) {
+
+            // SPECIFIC PHP FILTER
+            if (isset(static::$filters[$this->name])) {
+                $this->callback = $this->name;
+                $this->option = $option;
+            }
+
+            // GENERIC PHP FILTER
+            else {
+                $this->callback = 'php';
+                $this->option = $this->name;
+            }
+        }
+
+        // CUSTOM FILTER
+        else {
+            $this->callback = $this->name;
+            $this->option = $option;
+        }
     }
 
-    public static function addCustomFilter($name, $callback)
-    {
-        static::$filters[$name] = $callback;
-    }
 
-
-    /*************************************************************************
-    GETTER METHODS
+    /* GETTER METHODS
      *************************************************************************/
-    public function call(&$field)
+    public function getName()
     {
-        $callback = $this->callback;
-        if (!is_callable($callback)) {
+        return $this->name;
+    }
+
+    public function apply(&$field)
+    {
+        if (!isset(static::$filters[$this->callback])) {
             throw new \Exception('Filter not callable: ' . $this->name);
         }
-        return $callback($field);
-    }
-
-    public function getError()
-    {
-        return $this->error;
+        $factory = static::$filters[$this->callback];
+        $filter = $factory($this->option);
+        return $filter($field);
     }
 
 
-    /*************************************************************************
-    SETTER METHODS
+    /* PROTECTED METHODS
      *************************************************************************/
-    public function setError($error)
+    protected function isPHPFilter(&$name)
     {
-        $this->error = $error;
-        return $this;
+        if (is_string($name)) {
+            return (filter_id($name) !== FALSE);
+        }
+        if (is_int($name)) {
+            return ($this->getPHPFilterName($name) !== FALSE);
+        }
+        return FALSE;
     }
 
-    public function setOptions($options)
+    protected function getPHPFilterName($id)
     {
-        if ($this->isPHPFilter($this->name)) {
-            $callback = $this->getPHPFilter($this->name, $options);
-        } else if ($this->isCustomFilter($this->name)) {
-            $callback = $this->getCustomFilter($this->name, $options);
-        } else {
-            $callback = $this->getDefaultFilter();
-        }
-        $this->callback = $callback;
-    }
-
-
-    /*************************************************************************
-    PROTECTED METHODS
-     *************************************************************************/
-    public function isPHPFilter(&$id)
-    {
-        if (is_string($id)) {
-            return (filter_id($id) !== FALSE);
-        }
-        if (is_int($id)) {
-            foreach (filter_list() as $name) {
-                if (filter_id($name) == $id) {
-                    return TRUE;
-                }
+        foreach (filter_list() as $name) {
+            if (filter_id($name) == $id) {
+                return $name;
             }
         }
         return FALSE;
     }
 
-    public function getPHPFilter($id, $options)
+
+    /* STATIC METHODS
+     *************************************************************************/
+    public function initializeExistingFilters()
     {
-        if (is_string($id)) {
-            $id = filter_id($id);
-        }
-        return function (&$field) use ($id, $options) {
-            $options=array('options'=>$options);
-            if ($id === FILTER_VALIDATE_BOOLEAN) {
-                $options['flags'] = FILTER_NULL_ON_FAILURE;
-            }
-            $filtered = filter_var($field, $id, $options);
-            if ($id !== FILTER_VALIDATE_BOOLEAN && $filtered === FALSE) {
-                return FALSE;
-            }
-            if ($id === FILTER_VALIDATE_BOOLEAN && $filtered === NULL) {
+        static::addFilterDefinition('required', array($this, 'filterRequired'));
+        static::addFilterDefinition('boolean', array($this, 'filterBoolean'));
+        static::addFilterDefinition('php', array($this, 'filterPHP'));
+        static::addFilterDefinition('maxLength', array($this, 'filterMaxLength'));
+        static::addFilterDefinition('minLength', array($this, 'filterMinLength'));
+        static::$isInitialized = TRUE;
+    }
+
+    public static function addFilterDefinition($name, $callback)
+    {
+        static::$filters[$name] = $callback;
+    }
+
+
+    /* CUSTOM FILTER METHODS
+     *************************************************************************/
+    public static function filterPHP($name)
+    {
+        return function (&$field) use ($name) {
+            $filtered = filter_var($field, filter_id($name));
+            if ($filtered === FALSE) {
                 return FALSE;
             }
             $field = $filtered;
@@ -129,31 +140,19 @@ class FormInputFilter
         };
     }
 
-    public function isCustomFilter($name)
+    public static function filterBoolean()
     {
-        return isset(static::$filters[$name]);
-    }
-
-    public function getCustomFilter($name, $options)
-    {
-        $callback = static::$filters[$name];
-        if (!is_callable($callback)) {
-            throw new \Exception('Filter factory not callable: ' . $name);
-        }
-        return $callback($options);
-    }
-
-    public function getDefaultFilter()
-    {
-        return function ($field) {
-            return $field;
+        return function (&$field) {
+            $options = ['flags' => FILTER_NULL_ON_FAILURE];
+            $filtered = filter_var($field, FILTER_VALIDATE_BOOLEAN, $options);
+            if ($filtered === NULL) {
+                return FALSE;
+            }
+            $field = $filtered;
+            return TRUE;
         };
     }
 
-
-    /*************************************************************************
-    CUSTOM FILTER METHODS
-     *************************************************************************/
     public static function filterRequired()
     {
         return function ($field) {
@@ -161,23 +160,23 @@ class FormInputFilter
         };
     }
 
-    public static function filterMaxLength($options)
+    public static function filterMaxLength($maxLength)
     {
-        return function ($field) use ($options) {
-            if (!isset($options['length'])) {
-                $options['length'] = '32';
+        return function ($field) use ($maxLength) {
+            if (is_null($maxLength)) {
+                $maxLength = '255';
             }
-            return (strlen($field) <= $options['length']);
+            return (strlen($field) <= $maxLength);
         };
     }
 
-    public static function filterMinLength($options)
+    public static function filterMinLength($minLength)
     {
-        return function ($field) use ($options) {
-            if (!isset($options['length'])) {
-                $options['length'] = '8';
+        return function ($field) use ($minLength) {
+            if (is_null($minLength)) {
+                $minLength = '8';
             }
-            return (strlen($field) >= $options['length']);
+            return (strlen($field) >= $minLength);
         };
     }
 }
