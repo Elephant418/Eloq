@@ -62,4 +62,12 @@ class FormInput
             }
         }
     }
+
+    public function getFilter($name)
+    {
+        if (!isset($this->filters[$name])) {
+            throw new \RuntimeException('Try to get an unknown filter: '.$name);
+        }
+        return $this->filters[$name];
+    }
 }

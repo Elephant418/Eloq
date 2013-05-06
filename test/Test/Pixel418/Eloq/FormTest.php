@@ -129,8 +129,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /*************************************************************************
-    MAX & MIN LENGTH TEST METHODS
+    /* MAX & MIN LENGTH TEST METHODS
      *************************************************************************/
     public function testMaxLengthEntry_Nok()
     {
@@ -173,8 +172,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /*************************************************************************
-    PHP FILTER TEST METHODS
+    /* PHP FILTER TEST METHODS
      *************************************************************************/
     public function testPHPfilter_SanitizeStripTag_AsId()
     {
@@ -256,34 +254,28 @@ class FormTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /*************************************************************************
-    EXCEPTION TEST METHODS
+    /* EXCEPTION TEST METHODS
      *************************************************************************/
- /*   public function testException_UnknownField()
+    public function testException_UnknownField()
     {
-        $this->setExpectedException( 'Exception' );
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('login', FILTER_SANITIZE_STRING);
+        $this->setExpectedException( 'RuntimeException' );
+        $form = $this->getLoginForm()
+            ->addInputFilter('login', FILTER_SANITIZE_STRING);
     }
 
     public function testException_UnknownField_Options()
     {
-        $this->setExpectedException( 'Exception' );
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->addFilter('username', FILTER_VALIDATE_REGEXP)
-            ->setFilterOptions('login', FILTER_VALIDATE_REGEXP, ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
+        $this->setExpectedException( 'RuntimeException' );
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', FILTER_VALIDATE_REGEXP)
+            ->setInputFilterOption('login', FILTER_VALIDATE_REGEXP, '/^[a-zA-Z0-9_]*$/');
     }
 
-    public function testException_UnknownFilter()
+    public function testException_UnknownFilter_Options()
     {
-        $this->setExpectedException( 'Exception' );
-        $form = (new FormHelper);
-        $form->setValues( $_POST )
-            ->addField('username')
-            ->setFilterOptions('username', FILTER_VALIDATE_REGEXP, ['regexp'=>'/^[a-zA-Z0-9_]*$/']);
-    }*/
+        $this->setExpectedException( 'RuntimeException' );
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', FILTER_SANITIZE_STRING)
+            ->setInputFilterOption('username', FILTER_VALIDATE_REGEXP, '/^[a-zA-Z0-9_]*$/');
+    }
 }

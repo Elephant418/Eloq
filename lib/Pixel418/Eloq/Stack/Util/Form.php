@@ -109,6 +109,14 @@ class Form
         return $this;
     }
 
+    public function setInputFilterOption($inputName, $filterName, $option)
+    {
+        $input = $this->getInput($inputName);
+        $filter = $input->getFilter($filterName);
+        $filter->setOption($option);
+        return $this;
+    }
+
 
     /* FORM GETTER METHODS
      *************************************************************************/
