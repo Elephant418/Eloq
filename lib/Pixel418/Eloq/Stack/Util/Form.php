@@ -146,8 +146,7 @@ class Form
 
     public function setInputFilterOption($inputName, $filterName, $option)
     {
-        $input = $this->getInput($inputName);
-        $filter = $input->getFilter($filterName);
+        $filter = $this->getInputFilter($inputName, $filterName);
         $filter->setOption($option);
         return $this;
     }
@@ -252,22 +251,39 @@ class Form
     protected function initFetchValues($population)
     {
         foreach ($this->inputs as $input) {
-            $input->initFetchValue($population);
+            if (\UArray::hasDeepSelector($population, $input->address)) {
+                $input->isActive = TRUE;
+                $input->fetchValue = \UArray::getDeepSelector($population, $input->address);
+            }
         }
     }
 
     protected function validFetchValues()
     {
         foreach ($this->inputs as $input) {
-            $input->validFetchValue();
+            foreach ($input->filters as $filterName => $filter) {
+                if ($filter->apply($input->fetchValue, $this) === FALSE) {
+                    $input->error = $filterName;
+                    break;
+                }
+            }
         }
     }
 
     protected function getInput($name)
     {
         if (!isset($this->inputs[$name])) {
-            throw new \RuntimeException('Try to get an unknown input: ' . $name);
+            throw new \RuntimeException('Try to get an unknown input: '.$name);
         }
         return $this->inputs[$name];
+    }
+
+    public function getInputFilter($inputName, $filterName)
+    {
+        $input = $this->getInput($inputName);
+        if (!isset($this->filters[$filterName])) {
+            throw new \RuntimeException('Try to get an unknown filter: '.$filterName.' on '.$inputName);
+        }
+        return $this->filters[$filterName];
     }
 }

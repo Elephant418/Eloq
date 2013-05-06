@@ -77,7 +77,7 @@ class FormInputFilter
         return $this->name;
     }
 
-    public function apply(&$field)
+    public function apply(&$field, $form)
     {
         if (is_string($this->callback)) {
             if (!isset(static::$filters[$this->callback])) {
@@ -94,7 +94,7 @@ class FormInputFilter
         if (!is_callable($filter)) {
             throw new \RuntimeException('Filter ' . $this->callback . ' not callable for: ' . $this->name);
         }
-        return $filter($field);
+        return $filter($field, $form);
     }
 
 
@@ -120,6 +120,7 @@ class FormInputFilter
     {
         static::addFilterDefinition('required', array($this, 'filterRequired'), 'This field is required');
         static::addFilterDefinition('boolean', array($this, 'filterBoolean'));
+        static::addFilterDefinition('confirm', array($this, 'filterConfirm'));
         static::addFilterDefinition('validate_regexp', array($this, 'filterValidateRegexp'));
         static::addFilterDefinition('php', array($this, 'filterPHP'));
         static::addFilterDefinition('max_length', array($this, 'filterMaxLength'), 'This field is too long');
@@ -188,6 +189,17 @@ class FormInputFilter
     {
         return function ($field) {
             return (!is_null($field) && $field !== '');
+        };
+    }
+
+    public static function filterConfirm($options)
+    {
+        if (!count($options)) {
+            throw new \RuntimeException('Missing mandatory option: source');
+        }
+        $source = $options[0];
+        return function ($field, $form) use ($source) {
+            return ($field === $form->$source);
         };
     }
 

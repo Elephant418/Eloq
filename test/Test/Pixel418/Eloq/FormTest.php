@@ -197,6 +197,26 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 
+    public function testConfirmEntry_Nok()
+    {
+        $_POST = ['password' => 'secret', 'password2' => 'secr3t'];
+        $form = $this->getLoginForm()
+            ->addInput('password2', 'confirm:password');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must be invalid');
+        $this->assertEquals('confirm', $form->getInputError('password2'), 'One error must be thrown, the password field must not be confirmed');
+    }
+
+    public function testConfirmEntry_Ok()
+    {
+        $_POST = ['password' => 'secr3t', 'password2' => 'secr3t'];
+        $form = $this->getLoginForm()
+            ->addInput('password2', 'confirm:password');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertNull($form->getInputError('password2'), 'No error must be thrown');
+    }
+
 
     /* PHP FILTER TEST METHODS
      *************************************************************************/
