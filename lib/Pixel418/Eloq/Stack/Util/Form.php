@@ -11,8 +11,9 @@ class Form
     /* ATTRIBUTES
      *************************************************************************/
     const INPUT_ARRAY = 0;
+    static $errorMessages;
+    static $isInitialized = FALSE;
     private $namespace;
-    protected $lang;
     protected $population;
     protected $populationType;
     protected $inputs = array();
@@ -23,10 +24,11 @@ class Form
      *************************************************************************/
     public function __construct($populationType = INPUT_POST)
     {
+        if (!static::$isInitialized) {
+            $this->initialize();
+        }
         $this->setPopulationType($populationType);
         $this->namespace = \UObject::getNamespace($this);
-        $filterClass = $this->namespace . '\\FormInputFilter';
-        $this->setLang($filterClass::$lang);
     }
 
 
@@ -73,12 +75,6 @@ class Form
         return $this;
     }
 
-    public function setLang($lang)
-    {
-        $this->lang = $lang;
-        return $this;
-    }
-
 
     /* INPUT SETTER METHODS
      *************************************************************************/
@@ -108,14 +104,18 @@ class Form
         return $this;
     }
 
-    public function addInputFilter($inputName, $filterName, callable $filterCallback = NULL, $message = NULL)
+    public function addInputFilter($inputName, $filterName, $filterCallback = NULL, $errorMessage = NULL)
     {
+        if (is_null($errorMessage) && is_string($filterCallback) && \UString::has($filterCallback, ' ')) {
+            $errorMessage = $filterCallback;
+            $filterCallback = NULL;
+        }
         $input = $this->getInput($inputName);
         $filterClass = $this->namespace . '\\FormInputFilter';
         $filter = new $filterClass($filterName, $filterCallback);
         $input->filters[$filter->getName()] = $filter;
-        if (!is_null($message)) {
-            $this->lang[$filterName] = $message;
+        if (!is_null($errorMessage)) {
+            $input->errorMessage = $errorMessage;
         }
         return $this;
     }
@@ -144,10 +144,17 @@ class Form
         return $this;
     }
 
-    public function setInputFilterOption($inputName, $filterName, $option)
+    public function setInputFilterOptions($inputName, $filterName, $options)
     {
         $filter = $this->getInputFilter($inputName, $filterName);
-        $filter->setOption($option);
+        $filter->setOptions($options);
+        return $this;
+    }
+
+    public function setInputFilterErrorMessage($inputName, $filterName, $errorMessage)
+    {
+        $filter = $this->getInputFilter($inputName, $filterName);
+        $filter->errorMessage = $errorMessage;
         return $this;
     }
 
@@ -209,21 +216,22 @@ class Form
         return $input->error;
     }
 
-    public function getInputErrorMessage($name, $label=NULL)
+    public function getInputErrorMessage($inputName)
     {
-        $error = $this->getInputError($name);
+        $input = $this->getInput($inputName);
+        $error = $input->error;
         if ($error) {
-            if (isset($this->lang[$error])) {
-                $message = $this->lang[$error];
-            } else if (isset($this->lang['default'])) {
-                $message = $this->lang['default'];
+            if (!is_null($input->errorMessage)) {
+                $errorMessage = $input->errorMessage;
+            } else if (isset(static::$errorMessages[$error])) {
+                $errorMessage = static::$errorMessages[$error];
+            } else if (isset(static::$errorMessages['default'])) {
+                $errorMessage = static::$errorMessages['default'];
             } else {
-                $message = 'The field is not valid';
+                $errorMessage = 'The field is not valid';
             }
-            if (is_null($label)) {
-                $label = $name;
-            }
-            return sprintf($message, $label);
+            $options = $this->getInputFilter($inputName, $error)->getOptions();
+            return vsprintf($errorMessage, $options);
         }
     }
 
@@ -281,9 +289,31 @@ class Form
     public function getInputFilter($inputName, $filterName)
     {
         $input = $this->getInput($inputName);
-        if (!isset($this->filters[$filterName])) {
+        if (!isset($input->filters[$filterName])) {
             throw new \RuntimeException('Try to get an unknown filter: '.$filterName.' on '.$inputName);
         }
-        return $this->filters[$filterName];
+        return $input->filters[$filterName];
+    }
+
+
+    /* STATIC METHODS
+     *************************************************************************/
+    public function initialize()
+    {
+        static::addErrorMessage('required', 'This field is required');
+        static::addErrorMessage('confirm', 'This field does not match the previous one');
+        static::addErrorMessage('validate_regexp', 'This field contains unauthorized characters');
+        static::addErrorMessage('validate_email', 'This field must be a valid email');
+        static::addErrorMessage('validate_url', 'This field must be a valid url');
+        static::addErrorMessage('validate_ip', 'This field must be a valid IP');
+        static::addErrorMessage('max_length', 'This field must have %s characters at maximum');
+        static::addErrorMessage('min_length', 'This field must have %s characters at minimum');
+        static::addErrorMessage('default', 'This field is not valid');
+        static::$isInitialized = TRUE;
+    }
+
+    public static function addErrorMessage($error, $errorMessage)
+    {
+        static::$errorMessages[$error] = $errorMessage;
     }
 }

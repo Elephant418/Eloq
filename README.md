@@ -24,7 +24,7 @@ $signUp = (new Form)
         // And PHP filters
         ->addInputFilter('email', FILTER_SANITIZE_EMAIL)
         // And your own specific filters
-        ->addInputFilter('email', 'unique', function($email){
+        ->addInputFilter('email', 'unique_email', function($email){
             return get_user_by_email($email) === NULL;
         })
     // You can prefer use the shorthand syntax
@@ -41,7 +41,7 @@ if ( $signUp->isValid() ) {
         // And focus to make great error message
         switch ($signUp->getInputError('email')) {
             case 'required':
-                echo 'The email field is required';
+                echo 'This field is required';
                 break;
             case 'validate_email':
                 echo 'This field must be a valid email';

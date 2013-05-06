@@ -11,7 +11,6 @@ class FormInputFilter
     /* ATTRIBUTES
      *************************************************************************/
     static $filters = [];
-    static $lang = ['default' => 'The field is not valid'];
     static $isInitialized = FALSE;
     protected $name;
     protected $isPHPFilter = FALSE;
@@ -24,7 +23,7 @@ class FormInputFilter
     public function __construct($name, callable $callback = NULL)
     {
         if (!static::$isInitialized) {
-            $this->initializeExistingFilters();
+            $this->initialize();
         }
         $nameParts = explode(':', $name);
         $options = array_slice($nameParts, 1);
@@ -77,6 +76,11 @@ class FormInputFilter
         return $this->name;
     }
 
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
     public function apply(&$field, $form)
     {
         if (is_string($this->callback)) {
@@ -116,24 +120,21 @@ class FormInputFilter
 
     /* STATIC METHODS
      *************************************************************************/
-    public function initializeExistingFilters()
+    public function initialize()
     {
-        static::addFilterDefinition('required', array($this, 'filterRequired'), 'This field is required');
+        static::addFilterDefinition('required', array($this, 'filterRequired'));
         static::addFilterDefinition('boolean', array($this, 'filterBoolean'));
         static::addFilterDefinition('confirm', array($this, 'filterConfirm'));
         static::addFilterDefinition('validate_regexp', array($this, 'filterValidateRegexp'));
         static::addFilterDefinition('php', array($this, 'filterPHP'));
-        static::addFilterDefinition('max_length', array($this, 'filterMaxLength'), 'This field is too long');
-        static::addFilterDefinition('min_length', array($this, 'filterMinLength'), 'This field is too short');
+        static::addFilterDefinition('max_length', array($this, 'filterMaxLength'));
+        static::addFilterDefinition('min_length', array($this, 'filterMinLength'));
         static::$isInitialized = TRUE;
     }
 
-    public static function addFilterDefinition($name, $callback, $defaultMessage = NULL)
+    public static function addFilterDefinition($name, $callback)
     {
         static::$filters[$name] = $callback;
-        if (!is_null($defaultMessage)) {
-            static::$lang[$name]=$defaultMessage;
-        }
     }
 
 
@@ -146,11 +147,13 @@ class FormInputFilter
         }
         $name = $options[0];
         return function (&$field) use ($name) {
-            $filtered = filter_var($field, filter_id($name));
-            if ($filtered === FALSE) {
-                return FALSE;
+            if ($field !== '') {
+                $filtered = filter_var($field, filter_id($name));
+                if ($filtered === FALSE) {
+                    return FALSE;
+                }
+                $field = $filtered;
             }
-            $field = $filtered;
             return TRUE;
         };
     }
@@ -162,12 +165,14 @@ class FormInputFilter
         }
         $regexp = $options[0];
         return function (&$field) use ($regexp) {
-            $options = ['options' => ['regexp' => $regexp]];
-            $filtered = filter_var($field, FILTER_VALIDATE_REGEXP, $options);
-            if ($filtered === FALSE) {
-                return FALSE;
+            if ($field !== '') {
+                $options = ['options' => ['regexp' => $regexp]];
+                $filtered = filter_var($field, FILTER_VALIDATE_REGEXP, $options);
+                if ($filtered === FALSE) {
+                    return FALSE;
+                }
+                $field = $filtered;
             }
-            $field = $filtered;
             return TRUE;
         };
     }
@@ -213,7 +218,7 @@ class FormInputFilter
             if (is_null($maxLength)) {
                 $maxLength = '255';
             }
-            return (strlen($field) <= $maxLength);
+            return ($field === '' || strlen($field) <= $maxLength);
         };
     }
 
@@ -227,7 +232,7 @@ class FormInputFilter
             if (is_null($minLength)) {
                 $minLength = '8';
             }
-            return (strlen($field) >= $minLength);
+            return ($field === '' || strlen($field) >= $minLength);
         };
     }
 }
