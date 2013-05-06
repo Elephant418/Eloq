@@ -11,9 +11,19 @@ class Form
     /* ATTRIBUTES
      *************************************************************************/
     const INPUT_ARRAY = 0;
-    static $errorMessages;
-    static $isInitialized = FALSE;
+    static $defaultErrorMessages = [
+        'required' => 'This field is required',
+        'confirm' => 'This field does not match the previous one',
+        'validate_regexp' => 'This field contains unauthorized characters',
+        'validate_email' => 'This field must be a valid email',
+        'validate_url' => 'This field must be a valid url',
+        'validate_ip' => 'This field must be a valid IP',
+        'max_length' => 'This field must have %s characters at maximum',
+        'min_length' => 'This field must have %s characters at minimum',
+        'default' => 'This field is not valid'
+    ];
     private $namespace;
+    protected $errorMessages;
     protected $population;
     protected $populationType;
     protected $inputs = array();
@@ -24,9 +34,7 @@ class Form
      *************************************************************************/
     public function __construct($populationType = INPUT_POST)
     {
-        if (!static::$isInitialized) {
-            $this->initialize();
-        }
+        $this->errorMessages = static::$defaultErrorMessages;
         $this->setPopulationType($populationType);
         $this->namespace = \UObject::getNamespace($this);
     }
@@ -53,7 +61,7 @@ class Form
         $input = new $inputClass($name);
         $this->inputs[$name] = $input;
         if ($filters) {
-            $this->addInputFilters($name, $filters);
+            $this->addInputFilterList($name, $filters);
         }
         if ($address) {
             $this->setInputAddress($name, $address, $populationType);
@@ -120,14 +128,11 @@ class Form
         return $this;
     }
 
-    public function addInputFilters($inputName, $filters)
+    public function addInputFilterList($inputName, $filters, $errorMessage = NULL)
     {
-        $input = $this->getInput($inputName);
-        $filterClass = $this->namespace . '\\FormInputFilter';
         $filters = explode('|', $filters);
-        foreach ($filters as $inputName) {
-            $filter = new $filterClass($inputName);
-            $input->filters[$filter->getName()] = $filter;
+        foreach ($filters as $filterName) {
+            $this->addInputFilter($inputName, $filterName, $errorMessage);
         }
         return $this;
     }
@@ -223,10 +228,10 @@ class Form
         if ($error) {
             if (!is_null($input->errorMessage)) {
                 $errorMessage = $input->errorMessage;
-            } else if (isset(static::$errorMessages[$error])) {
-                $errorMessage = static::$errorMessages[$error];
-            } else if (isset(static::$errorMessages['default'])) {
-                $errorMessage = static::$errorMessages['default'];
+            } else if (isset($this->errorMessages[$error])) {
+                $errorMessage = $this->errorMessages[$error];
+            } else if (isset($this->errorMessages['default'])) {
+                $errorMessage = $this->errorMessages['default'];
             } else {
                 $errorMessage = 'The field is not valid';
             }
@@ -296,24 +301,31 @@ class Form
     }
 
 
-    /* STATIC METHODS
+    /* ERROR MESSAGES METHODS
      *************************************************************************/
-    public function initialize()
+    public function addErrorMessage($name, $message)
     {
-        static::addErrorMessage('required', 'This field is required');
-        static::addErrorMessage('confirm', 'This field does not match the previous one');
-        static::addErrorMessage('validate_regexp', 'This field contains unauthorized characters');
-        static::addErrorMessage('validate_email', 'This field must be a valid email');
-        static::addErrorMessage('validate_url', 'This field must be a valid url');
-        static::addErrorMessage('validate_ip', 'This field must be a valid IP');
-        static::addErrorMessage('max_length', 'This field must have %s characters at maximum');
-        static::addErrorMessage('min_length', 'This field must have %s characters at minimum');
-        static::addErrorMessage('default', 'This field is not valid');
-        static::$isInitialized = TRUE;
+        $this->errorMessages[$name] = $message;
+        return $this;
     }
 
-    public static function addErrorMessage($error, $errorMessage)
+    public function addErrorMessageMap($map)
     {
-        static::$errorMessages[$error] = $errorMessage;
+        foreach($map as $name => $message) {
+            $this->errorMessages[$name] = $message;
+        }
+        return $this;
+    }
+
+    public static function defineErrorMessage($name, $message)
+    {
+        static::$defaultErrorMessages[$name] = $message;
+    }
+
+    public static function defineErrorMessageMap($map)
+    {
+        foreach($map as $name => $message) {
+            static::$defaultErrorMessages[$name] = $message;
+        }
     }
 }

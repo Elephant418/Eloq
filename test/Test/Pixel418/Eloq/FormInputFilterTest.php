@@ -5,11 +5,28 @@ namespace Test\Pixel418\Eloq;
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
 use Pixel418\Eloq\Stack\Util\Form;
+use Pixel418\Eloq\Stack\Util\FormInputFilter;
 
 echo 'Eloq ' . \Pixel418\Eloq::VERSION . ' tested with ';
 
 class FormInputFilterTest extends \PHPUnit_Framework_TestCase
 {
+
+
+    /* UTILS
+     *************************************************************************/
+    private $defaultErrorMessages;
+
+    public function setUp()
+    {
+        $this->defaultErrorMessages = Form::$defaultErrorMessages;
+    }
+
+    public function tearDown()
+    {
+        Form::$defaultErrorMessages = $this->defaultErrorMessages;
+        FormInputFilter::$isInitialized = FALSE;
+    }
 
     public function getLoginForm()
     {
@@ -27,7 +44,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'balon.greyjoy';
         $form = $this->getLoginForm()
-            ->addInputFilters('password', 'required');
+            ->addInputFilterList('password', 'required');
         $this->assertTrue($form->isActive(), 'Form is detected as active');
         $this->assertFalse($form->isValid(), 'Form is detected as invalid');
         $this->assertNull($form->password, 'Non-existing form entry is null');
@@ -39,7 +56,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
         $_POST['username'] = 'yara.greyjoy';
         $_POST['password'] = '';
         $form = $this->getLoginForm()
-            ->addInputFilters('password', 'required');
+            ->addInputFilterList('password', 'required');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
         $this->assertEquals('', $form->password, 'The password fetched value must be an empty string');
@@ -53,7 +70,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
         $_POST['username'] = 'talisa.maegyr';
         $_POST['password'] = 'secret';
         $form = $this->getLoginForm()
-            ->addInputFilters('password', 'required');
+            ->addInputFilterList('password', 'required');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertEquals($_POST['password'], $form->password, 'The password fetched value must be the given string');
@@ -69,7 +86,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'margaery.tyrell'; // username length: 15
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'max_length:14');
+            ->addInputFilterList('username', 'max_length:14');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
         $this->assertEquals('max_length', $form->getInputError('username'), 'One error must be thrown, the username field must be too long');
@@ -79,7 +96,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'olenna.tyrell'; // username length: 13
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'max_length:13');
+            ->addInputFilterList('username', 'max_length:13');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertNull($form->getInputError('username'), 'No error must be thrown');
@@ -89,7 +106,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = ''; // username length: 0
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'max_length:13');
+            ->addInputFilterList('username', 'max_length:13');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertNull($form->getInputError('username'), 'No error must be thrown');
@@ -99,7 +116,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = ''; // username length: 0
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'max_length:14|required');
+            ->addInputFilterList('username', 'max_length:14|required');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
         $this->assertEquals('required', $form->getInputError('username'), 'One error must be thrown, the username field is required');
@@ -112,7 +129,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'mance.raider'; // username length: 12
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'min_length:13');
+            ->addInputFilterList('username', 'min_length:13');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
         $this->assertEquals('min_length', $form->getInputError('username'), 'One error must be thrown, the username field must be too short');
@@ -122,7 +139,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'brienne.de.torth'; // username length: 16
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'min_length:16');
+            ->addInputFilterList('username', 'min_length:16');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertNull($form->getInputError('username'), 'No error must be thrown');
@@ -132,7 +149,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = ''; // username length: 0
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'min_length:16');
+            ->addInputFilterList('username', 'min_length:16');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertNull($form->getInputError('username'), 'No error must be thrown');
@@ -142,7 +159,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = ''; // username length: 0
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'min_length:16|required');
+            ->addInputFilterList('username', 'min_length:16|required');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
         $this->assertEquals('required', $form->getInputError('username'), 'One error must be thrown, the username field is required');
@@ -179,7 +196,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
         $username = 'xaro.xhoan.daxos';
         $_POST['username'] = $username . '<script>';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', FILTER_SANITIZE_STRING);
+            ->addInputFilterList('username', FILTER_SANITIZE_STRING);
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertEquals($username, $form->getInputValue('username'), 'The username input must be sanitized');
@@ -191,7 +208,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
         $username = 'ygritte';
         $_POST['username'] = '<script>' . $username;
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'string');
+            ->addInputFilterList('username', 'string');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertEquals($username, $form->getInputValue('username'), 'The username input must be sanitized');
@@ -205,7 +222,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'jaqen.h-ghar';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'validate_email');
+            ->addInputFilterList('username', 'validate_email');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must not be valid');
         $this->assertEquals($_POST['username'], $form->getInputValue('username'), 'The invalid email must be intact');
@@ -216,7 +233,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'craster@freefolk.north';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'validate_email');
+            ->addInputFilterList('username', 'validate_email');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
@@ -227,7 +244,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = '';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'validate_email');
+            ->addInputFilterList('username', 'validate_email');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
@@ -238,7 +255,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = '';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'validate_email|required');
+            ->addInputFilterList('username', 'validate_email|required');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must not be valid');
         $this->assertEquals($_POST['username'], $form->getInputValue('username'), 'The invalid email must be intact');
@@ -252,7 +269,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = '0';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'boolean');
+            ->addInputFilterList('username', 'boolean');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertFalse($form->username, 'The given entry must be a false boolean');
@@ -263,7 +280,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = '';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'boolean|required');
+            ->addInputFilterList('username', 'boolean|required');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertFalse($form->username, 'The given entry must be a false boolean');
@@ -277,7 +294,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'davos.mervault';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/');
+            ->addInputFilterList('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
@@ -291,7 +308,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'mélisandre d’asshaï';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/');
+            ->addInputFilterList('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
         $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
@@ -302,7 +319,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = '';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/');
+            ->addInputFilterList('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
         $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
@@ -313,52 +330,10 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = '';
         $form = $this->getLoginForm()
-            ->addInputFilters('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/|required');
+            ->addInputFilterList('username', 'validate_regexp:/^[a-zA-Z0-9.]*$/|required');
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertFalse($form->isValid(), 'Form must be invalid');
         $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
         $this->assertEquals('required', $form->getInputError('username'), 'One error must be thrown, the username field is required');
-    }
-
-
-    /* LIVE FILTER TEST METHODS
-     *************************************************************************/
-    public function testLiveFildet_Validation_Ok()
-    {
-        $_POST['username'] = 'alliser.thorne';
-        $form = $this->getLoginForm()
-            ->addInputFilter('username', 'with_a', function ($field) {
-                return \UString::has($field, 'a');
-            });
-        $this->assertTrue($form->isActive(), 'Form must be active');
-        $this->assertTrue($form->isValid(), 'Form must be valid');
-        $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
-        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
-    }
-
-    public function testLiveFildet_Validation_Nok()
-    {
-        $_POST['username'] = 'syrio.forel';
-        $form = $this->getLoginForm()
-            ->addInputFilter('username', 'with_a', function ($field) {
-                return ($field === '' || \UString::has($field, 'a'));
-            });
-        $this->assertTrue($form->isActive(), 'Form must be active');
-        $this->assertFalse($form->isValid(), 'Form must be invalid');
-        $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
-        $this->assertEquals('with_a', $form->getInputError('username'), 'One error must be thrown, the username field must not validate the live filter');
-    }
-
-    public function testLiveFildet_Sanitize()
-    {
-        $_POST['username'] = 'lancel.lannister';
-        $form = $this->getLoginForm()
-            ->addInputFilter('username', 'without_a', function (&$field) {
-                $field = str_replace('a', '', $field);
-            });
-        $this->assertTrue($form->isActive(), 'Form must be active');
-        $this->assertTrue($form->isValid(), 'Form must be valid');
-        $this->assertEquals('lncel.lnnister', $form->username, 'The given entry must be intact');
-        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
 }
