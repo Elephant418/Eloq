@@ -58,6 +58,14 @@ class Form
         return $this;
     }
 
+    public function clear()
+    {
+        foreach ($this->inputs as $input) {
+            $input->fetchValue = NULL;
+        }
+        return $this;
+    }
+
 
     /* INPUT SETTER METHODS
      *************************************************************************/

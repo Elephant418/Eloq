@@ -90,6 +90,16 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($form->getInputError('password'), 'Input has no error');
     }
 
+    public function testActiveForm_Clear()
+    {
+        $_POST['username'] = 'lord.commandant.mormont';
+        $form = $this->getLoginForm();
+        $form->treat();
+        $this->assertEquals($_POST['username'], $form->username, 'Input has the fetch value');
+        $form->clear();
+        $this->assertNull($form->username, 'Input was cleared');
+    }
+
 
     /* REQUIRED TEST METHODS
      *************************************************************************/
