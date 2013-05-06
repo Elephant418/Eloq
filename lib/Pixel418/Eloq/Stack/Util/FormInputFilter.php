@@ -20,7 +20,7 @@ class FormInputFilter
 
     /* CONSTRUCTOR METHODS
      *************************************************************************/
-    public function __construct($name)
+    public function __construct($name, $callback=NULL)
     {
         if (!static::$isInitialized) {
             $this->initializeExistingFilters();
@@ -33,6 +33,7 @@ class FormInputFilter
             $name = $PHPFilterName;
         }
         $this->name = $name;
+        $this->callback = $callback;
         $this->setOptions($options);
     }
 
@@ -41,31 +42,33 @@ class FormInputFilter
      *************************************************************************/
     public function setOptions($options)
     {
-        if (is_string($options)) {
-            $options = explode(':', $options);
-        } else {
-            $options = array_values($options);
-        }
-        if ($this->isPHPFilter) {
+        if (is_null($this->callback)) {
+            if (is_string($options)) {
+                $options = explode(':', $options);
+            } else {
+                $options = array_values($options);
+            }
+            if ($this->isPHPFilter) {
 
-            // SPECIFIC PHP FILTER
-            if (isset(static::$filters[$this->name])) {
+                // SPECIFIC PHP FILTER
+                if (isset(static::$filters[$this->name])) {
+                    $this->callback = $this->name;
+                    $this->options = $options;
+                }
+
+                // GENERIC PHP FILTER
+                else {
+                    $this->callback = 'php';
+                    array_unshift($options, $this->name);
+                    $this->options = $options;
+                }
+            }
+
+            // DEFINED FILTER
+            else {
                 $this->callback = $this->name;
                 $this->options = $options;
             }
-
-            // GENERIC PHP FILTER
-            else {
-                $this->callback = 'php';
-                array_unshift($options, $this->name);
-                $this->options = $options;
-            }
-        }
-
-        // CUSTOM FILTER
-        else {
-            $this->callback = $this->name;
-            $this->options = $options;
         }
     }
 
@@ -79,11 +82,15 @@ class FormInputFilter
 
     public function apply(&$field)
     {
-        if (!isset(static::$filters[$this->callback])) {
-            throw new \RuntimeException('Filter not callable: ' . $this->name);
+        if (is_string($this->callback)) {
+            if (!isset(static::$filters[$this->callback])) {
+                throw new \RuntimeException('Filter not callable: ' . $this->name);
+            }
+            $factory = static::$filters[$this->callback];
+            $filter = $factory($this->options);
+        } else {
+            $filter = $this->callback;
         }
-        $factory = static::$filters[$this->callback];
-        $filter = $factory($this->options);
         return $filter($field);
     }
 

@@ -77,33 +77,42 @@ class Form
 
     /* FILTER SETTER METHODS
      *************************************************************************/
-    public function setInputFilter($name, $filters)
+    public function setInputFilter($inputName, $filters)
     {
-        $input = $this->getInput($name);
+        $input = $this->getInput($inputName);
         $input->filters = [];
-        $this->addInputFilter($name, $filters);
+        $this->addInputFilter($inputName, $filters);
         return $this;
     }
 
-    public function addInputFilter($name, $filters)
+    public function addInputFilter($inputName, $filterName, $filterCallback)
     {
-        $input = $this->getInput($name);
+        $input = $this->getInput($inputName);
+        $filterClass = $this->namespace.'\\FormInputFilter';
+        $filter = new $filterClass($filterName, $filterCallback);
+        $input->filters[$filter->getName()] = $filter;
+        return $this;
+    }
+
+    public function addInputFilters($inputName, $filters)
+    {
+        $input = $this->getInput($inputName);
         $filterClass = $this->namespace.'\\FormInputFilter';
         $filters = explode('|',$filters);
-        foreach ($filters as $name) {
-            $filter = new $filterClass($name);
+        foreach ($filters as $inputName) {
+            $filter = new $filterClass($inputName);
             $input->filters[$filter->getName()] = $filter;
         }
         return $this;
     }
 
-    public function removeInputFilter($name, $filters)
+    public function removeInputFilter($inputName, $filters)
     {
-        $input = $this->getInput($name);
+        $input = $this->getInput($inputName);
         $filterClass = $this->namespace.'\\FormInputFilter';
         $filters = explode('|',$filters);
-        foreach ($filters as $name) {
-            $filter = new $filterClass($name);
+        foreach ($filters as $inputName) {
+            $filter = new $filterClass($inputName);
             unset( $input->filters[$filter->getName()] );
         }
         return $this;
