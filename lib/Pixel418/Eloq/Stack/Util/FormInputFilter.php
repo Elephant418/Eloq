@@ -14,7 +14,7 @@ class FormInputFilter
     static $isInitialized = FALSE;
     protected $name;
     protected $isPHPFilter = FALSE;
-    protected $option;
+    protected $options;
     protected $callback;
 
 
@@ -25,43 +25,47 @@ class FormInputFilter
         if (!static::$isInitialized) {
             $this->initializeExistingFilters();
         }
-        $option = NULL;
-        if (\UString::has($name, ':')) {
-            $option = \UString::substrAfterLast($name, ':');
-            \UString::doSubstrBeforeLast($name, ':');
-        }
+        $nameParts = explode(':', $name);
+        $options = array_slice($nameParts,1);
+        $name = $nameParts[0];
         if ($PHPFilterName = $this->getPHPFilterName($name)) {
             $this->isPHPFilter = TRUE;
             $name = $PHPFilterName;
         }
         $this->name = $name;
-        $this->setOption($option);
+        $this->setOptions($options);
     }
 
 
     /* SETTER METHODS
      *************************************************************************/
-    public function setOption($option)
+    public function setOptions($options)
     {
+        if (is_string($options)) {
+            $options = explode(':', $options);
+        } else {
+            $options = array_values($options);
+        }
         if ($this->isPHPFilter) {
 
             // SPECIFIC PHP FILTER
             if (isset(static::$filters[$this->name])) {
                 $this->callback = $this->name;
-                $this->option = $option;
+                $this->options = $options;
             }
 
             // GENERIC PHP FILTER
             else {
                 $this->callback = 'php';
-                $this->option = $this->name;
+                array_unshift($options, $this->name);
+                $this->options = $options;
             }
         }
 
         // CUSTOM FILTER
         else {
             $this->callback = $this->name;
-            $this->option = $option;
+            $this->options = $options;
         }
     }
 
@@ -76,10 +80,10 @@ class FormInputFilter
     public function apply(&$field)
     {
         if (!isset(static::$filters[$this->callback])) {
-            throw new \Exception('Filter not callable: ' . $this->name);
+            throw new \RuntimeException('Filter not callable: ' . $this->name);
         }
         $factory = static::$filters[$this->callback];
-        $filter = $factory($this->option);
+        $filter = $factory($this->options);
         return $filter($field);
     }
 
@@ -121,8 +125,12 @@ class FormInputFilter
 
     /* CUSTOM FILTER METHODS
      *************************************************************************/
-    public static function filterPHP($name)
+    public static function filterPHP($options)
     {
+        if (!count($options)) {
+            throw new \RuntimeException('Missing mandatory option: filter name');
+        }
+        $name = $options[0];
         return function (&$field) use ($name) {
             $filtered = filter_var($field, filter_id($name));
             if ($filtered === FALSE) {
@@ -133,8 +141,12 @@ class FormInputFilter
         };
     }
 
-    public static function filterValidateRegexp($regexp)
+    public static function filterValidateRegexp($options)
     {
+        if (!count($options)) {
+            throw new \RuntimeException('Missing mandatory option: regexp');
+        }
+        $regexp = $options[0];
         return function (&$field) use ($regexp) {
             $options = ['options'=>['regexp' => $regexp]];
             $filtered = filter_var($field, FILTER_VALIDATE_REGEXP, $options);
@@ -166,8 +178,12 @@ class FormInputFilter
         };
     }
 
-    public static function filterMaxLength($maxLength)
+    public static function filterMaxLength($options)
     {
+        if (!count($options)) {
+            throw new \RuntimeException('Missing mandatory option: maxLength');
+        }
+        $maxLength = $options[0];
         return function ($field) use ($maxLength) {
             if (is_null($maxLength)) {
                 $maxLength = '255';
@@ -176,8 +192,12 @@ class FormInputFilter
         };
     }
 
-    public static function filterMinLength($minLength)
+    public static function filterMinLength($options)
     {
+        if (!count($options)) {
+            throw new \RuntimeException('Missing mandatory option: minLength');
+        }
+        $minLength = $options[0];
         return function ($field) use ($minLength) {
             if (is_null($minLength)) {
                 $minLength = '8';

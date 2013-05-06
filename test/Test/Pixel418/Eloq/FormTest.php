@@ -271,11 +271,29 @@ class FormTest extends \PHPUnit_Framework_TestCase
             ->setInputFilterOption('login', FILTER_VALIDATE_REGEXP, '/^[a-zA-Z0-9_]*$/');
     }
 
+    public function testException_UnknownFilter()
+    {
+        $_POST['username'] = 'stannis.baratheon';
+        $this->setExpectedException( 'RuntimeException' );
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'php3')
+            ->treat();
+    }
+
     public function testException_UnknownFilter_Options()
     {
         $this->setExpectedException( 'RuntimeException' );
         $form = $this->getLoginForm()
             ->addInputFilter('username', FILTER_SANITIZE_STRING)
             ->setInputFilterOption('username', FILTER_VALIDATE_REGEXP, '/^[a-zA-Z0-9_]*$/');
+    }
+
+    public function testException_MissingOption()
+    {
+        $_POST['username'] = 'samwell.tarly';
+        $this->setExpectedException( 'RuntimeException' );
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'php')
+            ->treat();
     }
 }
