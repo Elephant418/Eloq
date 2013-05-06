@@ -10,7 +10,7 @@ class Form
 
     /* ATTRIBUTES
      *************************************************************************/
-    const INPUT_ARRAY = 0;
+    const INPUT_ARRAY = 418;
     static $defaultErrorMessages = [
         'required' => 'This field is required',
         'confirm' => 'This field does not match the previous one',
@@ -169,8 +169,7 @@ class Form
     public function treat()
     {
         if (!$this->isTreated) {
-            $population = $this->getPopulation();
-            $this->initFetchValues($population);
+            $this->initFetchValues();
             $this->isTreated = TRUE;
             if ($this->isActive()) {
                 $this->validFetchValues();
@@ -192,7 +191,6 @@ class Form
 
     public function isValid()
     {
-        $this->treat();
         if (!$this->isActive()) {
             return FALSE;
         }
@@ -263,15 +261,16 @@ class Form
         if (is_null($populationType)) {
             $populationType = $this->populationType;
         }
-        if ($populationType == self::INPUT_ARRAY) {
+        if ($populationType === self::INPUT_ARRAY) {
             return $this->population;
         }
         return filter_input_array($populationType);
     }
 
-    protected function initFetchValues($population)
+    protected function initFetchValues()
     {
         foreach ($this->inputs as $input) {
+            $population = $this->getPopulation($input->populationType);
             if (\UArray::hasDeepSelector($population, $input->address)) {
                 $input->isActive = TRUE;
                 $input->fetchValue = \UArray::getDeepSelector($population, $input->address);
