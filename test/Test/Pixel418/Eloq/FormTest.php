@@ -90,6 +90,18 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($form->getInputError('password'), 'Input has no error');
     }
 
+    public function testActiveForm_WithAddress()
+    {
+        $_POST = ['prefix' => ['login' => 'beric.dondarrion']];
+        $form = $this->getLoginForm()
+            ->setInputAddress('username', 'prefix.login')
+            ->treat();
+        $this->assertEquals($_POST['prefix']['login'], $form->username, 'Input has the fetch value');
+        $this->assertNull($form->getInputError('username'), 'Input has no error');
+        $this->assertNull($form->password, 'Input has a NULL value');
+        $this->assertNull($form->getInputError('password'), 'Input has no error');
+    }
+
     public function testActiveForm_Clear()
     {
         $_POST['username'] = 'lord.commandant.mormont';
