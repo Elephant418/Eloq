@@ -123,7 +123,7 @@ class Form
         $filter = new $filterClass($filterName, $filterCallback);
         $input->filters[$filter->getName()] = $filter;
         if (!is_null($errorMessage)) {
-            $input->errorMessage = $errorMessage;
+            $filter->errorMessage = $errorMessage;
         }
         return $this;
     }
@@ -232,8 +232,9 @@ class Form
         $input = $this->getInput($inputName);
         $error = $input->error;
         if ($error) {
-            if (!is_null($input->errorMessage)) {
-                $errorMessage = $input->errorMessage;
+            $filter = $this->getInputFilter($inputName, $error);
+            if (!is_null($filter->errorMessage)) {
+                $errorMessage = $filter->errorMessage;
             } else if (isset($this->errorMessages[$error])) {
                 $errorMessage = $this->errorMessages[$error];
             } else if (isset($this->errorMessages['default'])) {
@@ -241,7 +242,7 @@ class Form
             } else {
                 $errorMessage = 'The field is not valid';
             }
-            $options = $this->getInputFilter($inputName, $error)->getOptions();
+            $options = $filter->getOptions();
             return vsprintf($errorMessage, $options);
         }
     }

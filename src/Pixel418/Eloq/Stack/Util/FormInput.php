@@ -16,7 +16,6 @@ class FormInput
     public $fetchValue;
     public $filters = array();
     public $error;
-    public $errorMessage;
     public $isActive = FALSE;
 
 

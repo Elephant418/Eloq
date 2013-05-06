@@ -16,6 +16,7 @@ class FormInputFilter
     protected $isPHPFilter = FALSE;
     protected $options;
     protected $callback;
+    public $errorMessage;
 
 
     /* CONSTRUCTOR METHODS
