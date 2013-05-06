@@ -17,7 +17,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
             ->addInput('username')
             ->addInput('password')
             // A hack to allow $_POST data simulation
-            ->setPopulation( $_POST );
+            ->setPopulation($_POST);
     }
 
 
@@ -37,14 +37,14 @@ class FormTest extends \PHPUnit_Framework_TestCase
 
     public function testInactiveForm()
     {
-        $_POST = ['unknownEntry'=>'someValue'];
+        $_POST = ['unknownEntry' => 'someValue'];
         $form = $this->getLoginForm();
         $this->assertFalse($form->isActive(), 'Form must be inactive');
     }
 
     public function testActiveFullForm()
     {
-        $_POST = ['username'=>'tzi', 'password'=>'secret'];
+        $_POST = ['username' => 'tzi', 'password' => 'secret'];
         $form = $this->getLoginForm();
         $this->assertTrue($form->isActive(), 'Form must be active');
         $this->assertTrue($form->isValid(), 'Form must be valid');
@@ -125,6 +125,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('', $form->password, 'The password fetched value must be an empty string');
         $this->assertEquals('required', $form->getInputError('password'), 'One error must be thrown, the password field must be required');
         $this->assertFalse($form->isInputValid('password'), 'The password field must be invalid');
+        $this->assertEquals('This field is required', $form->getInputErrorMessage('password'), 'One explicit error message could be display');
     }
 
     public function testRequiredEntry_Given()
@@ -138,6 +139,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($_POST['password'], $form->password, 'The password fetched value must be the given string');
         $this->assertNull($form->getInputError('password'), 'No error must be thrown');
         $this->assertTrue($form->isInputValid('password'), 'The password field must be valid');
+        $this->assertNull($form->getInputErrorMessage('password'), 'No error message could be display');
     }
 
 
@@ -189,7 +191,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     public function testPHPfilter_SanitizeStripTag_AsId()
     {
         $username = 'xaro.xhoan.daxos';
-        $_POST['username'] = $username.'<script>';
+        $_POST['username'] = $username . '<script>';
         $form = $this->getLoginForm()
             ->addInputFilters('username', FILTER_SANITIZE_STRING);
         $this->assertTrue($form->isActive(), 'Form must be active');
@@ -201,7 +203,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     public function testPHPfilter_SanitizeStripTag_AsName()
     {
         $username = 'ygritte';
-        $_POST['username'] = '<script>'.$username;
+        $_POST['username'] = '<script>' . $username;
         $form = $this->getLoginForm()
             ->addInputFilters('username', 'string');
         $this->assertTrue($form->isActive(), 'Form must be active');
@@ -272,7 +274,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'alliser.thorne';
         $form = $this->getLoginForm()
-            ->addInputFilter('username', 'with_a', function($field){
+            ->addInputFilter('username', 'with_a', function ($field) {
                 return \UString::has($field, 'a');
             });
         $this->assertTrue($form->isActive(), 'Form must be active');
@@ -285,7 +287,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'syrio.forel';
         $form = $this->getLoginForm()
-            ->addInputFilter('username', 'with_a', function($field){
+            ->addInputFilter('username', 'with_a', function ($field) {
                 return \UString::has($field, 'a');
             });
         $this->assertTrue($form->isActive(), 'Form must be active');
@@ -298,7 +300,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     {
         $_POST['username'] = 'lancel.lannister';
         $form = $this->getLoginForm()
-            ->addInputFilter('username', 'without_a', function(&$field){
+            ->addInputFilter('username', 'without_a', function (&$field) {
                 $field = str_replace('a', '', $field);
             });
         $this->assertTrue($form->isActive(), 'Form must be active');
@@ -312,14 +314,14 @@ class FormTest extends \PHPUnit_Framework_TestCase
      *************************************************************************/
     public function testException_UnknownField()
     {
-        $this->setExpectedException( 'RuntimeException' );
+        $this->setExpectedException('RuntimeException');
         $form = $this->getLoginForm()
             ->addInputFilters('login', FILTER_SANITIZE_STRING);
     }
 
     public function testException_UnknownField_Options()
     {
-        $this->setExpectedException( 'RuntimeException' );
+        $this->setExpectedException('RuntimeException');
         $form = $this->getLoginForm()
             ->addInputFilters('username', FILTER_VALIDATE_REGEXP)
             ->setInputFilterOption('login', FILTER_VALIDATE_REGEXP, '/^[a-zA-Z0-9_]*$/');
@@ -328,7 +330,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     public function testException_UnknownFilter()
     {
         $_POST['username'] = 'stannis.baratheon';
-        $this->setExpectedException( 'RuntimeException' );
+        $this->setExpectedException('RuntimeException');
         $form = $this->getLoginForm()
             ->addInputFilters('username', 'php3')
             ->treat();
@@ -336,7 +338,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
 
     public function testException_UnknownFilter_Options()
     {
-        $this->setExpectedException( 'RuntimeException' );
+        $this->setExpectedException('RuntimeException');
         $form = $this->getLoginForm()
             ->addInputFilters('username', FILTER_SANITIZE_STRING)
             ->setInputFilterOption('username', FILTER_VALIDATE_REGEXP, '/^[a-zA-Z0-9_]*$/');
@@ -345,7 +347,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     public function testException_MissingOption()
     {
         $_POST['username'] = 'samwell.tarly';
-        $this->setExpectedException( 'RuntimeException' );
+        $this->setExpectedException('RuntimeException');
         $form = $this->getLoginForm()
             ->addInputFilters('username', 'php')
             ->treat();

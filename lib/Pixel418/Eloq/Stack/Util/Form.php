@@ -12,6 +12,7 @@ class Form
      *************************************************************************/
     const INPUT_ARRAY = 0;
     private $namespace;
+    protected $lang;
     protected $population;
     protected $populationType;
     protected $inputs = array();
@@ -24,6 +25,8 @@ class Form
     {
         $this->setPopulationType($populationType);
         $this->namespace = \UObject::getNamespace($this);
+        $filterClass = $this->namespace . '\\FormInputFilter';
+        $this->setLang($filterClass::$lang);
     }
 
 
@@ -35,15 +38,16 @@ class Form
         return $this;
     }
 
-    public function setPopulation(array $population){
+    public function setPopulation(array $population)
+    {
         $this->setPopulationType(self::INPUT_ARRAY);
         $this->population = $population;
         return $this;
     }
 
-    public function addInput($name, $address=NULL, $populationType=NULL)
+    public function addInput($name, $address = NULL, $populationType = NULL)
     {
-        $inputClass = $this->namespace.'\\FormInput';
+        $inputClass = $this->namespace . '\\FormInput';
         $input = new $inputClass($name);
         $this->inputs[$name] = $input;
         if ($address) {
@@ -66,17 +70,25 @@ class Form
         return $this;
     }
 
+    public function setLang($lang)
+    {
+        $this->lang = $lang;
+        return $this;
+    }
+
 
     /* INPUT SETTER METHODS
      *************************************************************************/
-    public function setInputAddress($name, $address, $populationType=NULL) {
+    public function setInputAddress($name, $address, $populationType = NULL)
+    {
         $input = $this->getInput($name);
         $input->address = $address;
         $input->populationType = $populationType;
         return $this;
     }
 
-    public function setInputDefaultValue($name, $defaultValue) {
+    public function setInputDefaultValue($name, $defaultValue)
+    {
         $input = $this->getInput($name);
         $input->defaultValue = $defaultValue;
         return $this;
@@ -93,10 +105,10 @@ class Form
         return $this;
     }
 
-    public function addInputFilter($inputName, $filterName, callable $filterCallback=NULL)
+    public function addInputFilter($inputName, $filterName, callable $filterCallback = NULL)
     {
         $input = $this->getInput($inputName);
-        $filterClass = $this->namespace.'\\FormInputFilter';
+        $filterClass = $this->namespace . '\\FormInputFilter';
         $filter = new $filterClass($filterName, $filterCallback);
         $input->filters[$filter->getName()] = $filter;
         return $this;
@@ -105,8 +117,8 @@ class Form
     public function addInputFilters($inputName, $filters)
     {
         $input = $this->getInput($inputName);
-        $filterClass = $this->namespace.'\\FormInputFilter';
-        $filters = explode('|',$filters);
+        $filterClass = $this->namespace . '\\FormInputFilter';
+        $filters = explode('|', $filters);
         foreach ($filters as $inputName) {
             $filter = new $filterClass($inputName);
             $input->filters[$filter->getName()] = $filter;
@@ -117,11 +129,11 @@ class Form
     public function removeInputFilter($inputName, $filters)
     {
         $input = $this->getInput($inputName);
-        $filterClass = $this->namespace.'\\FormInputFilter';
-        $filters = explode('|',$filters);
+        $filterClass = $this->namespace . '\\FormInputFilter';
+        $filters = explode('|', $filters);
         foreach ($filters as $inputName) {
             $filter = new $filterClass($inputName);
-            unset( $input->filters[$filter->getName()] );
+            unset($input->filters[$filter->getName()]);
         }
         return $this;
     }
@@ -139,7 +151,7 @@ class Form
      *************************************************************************/
     public function treat()
     {
-        if(!$this->isTreated) {
+        if (!$this->isTreated) {
             $population = $this->getPopulation();
             $this->initFetchValues($population);
             $this->isTreated = TRUE;
@@ -186,9 +198,28 @@ class Form
         return $input->getValue();
     }
 
-    public function getInputError($name){
+    public function getInputError($name)
+    {
         $input = $this->getInput($name);
         return $input->error;
+    }
+
+    public function getInputErrorMessage($name, $label=NULL)
+    {
+        $error = $this->getInputError($name);
+        if ($error) {
+            if (isset($this->lang[$error])) {
+                $message = $this->lang[$error];
+            } else if (isset($this->lang['default'])) {
+                $message = $this->lang['default'];
+            } else {
+                $message = 'The field is not valid';
+            }
+            if (is_null($label)) {
+                $label = $name;
+            }
+            return sprintf($message, $label);
+        }
     }
 
     public function isInputValid($name)
@@ -201,11 +232,12 @@ class Form
 
     /* PROTECTED METHODS
      *************************************************************************/
-    protected function getPopulation($populationType=NULL){
+    protected function getPopulation($populationType = NULL)
+    {
         if (is_null($populationType)) {
             $populationType = $this->populationType;
         }
-        if ($populationType==self::INPUT_ARRAY) {
+        if ($populationType == self::INPUT_ARRAY) {
             return $this->population;
         }
         return filter_input_array($populationType);
@@ -228,7 +260,7 @@ class Form
     protected function getInput($name)
     {
         if (!isset($this->inputs[$name])) {
-            throw new \RuntimeException('Try to get an unknown input: '.$name);
+            throw new \RuntimeException('Try to get an unknown input: ' . $name);
         }
         return $this->inputs[$name];
     }

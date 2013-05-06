@@ -10,7 +10,8 @@ class FormInputFilter
 
     /* ATTRIBUTES
      *************************************************************************/
-    static $filters = array();
+    static $filters = [];
+    static $lang = ['default' => 'The field is not valid'];
     static $isInitialized = FALSE;
     protected $name;
     protected $isPHPFilter = FALSE;
@@ -20,13 +21,13 @@ class FormInputFilter
 
     /* CONSTRUCTOR METHODS
      *************************************************************************/
-    public function __construct($name, callable $callback=NULL)
+    public function __construct($name, callable $callback = NULL)
     {
         if (!static::$isInitialized) {
             $this->initializeExistingFilters();
         }
         $nameParts = explode(':', $name);
-        $options = array_slice($nameParts,1);
+        $options = array_slice($nameParts, 1);
         $name = $nameParts[0];
         if ($PHPFilterName = $this->getPHPFilterName($name)) {
             $this->isPHPFilter = TRUE;
@@ -54,17 +55,13 @@ class FormInputFilter
                 if (isset(static::$filters[$this->name])) {
                     $this->callback = $this->name;
                     $this->options = $options;
-                }
-
-                // GENERIC PHP FILTER
+                } // GENERIC PHP FILTER
                 else {
                     $this->callback = 'php';
                     array_unshift($options, $this->name);
                     $this->options = $options;
                 }
-            }
-
-            // DEFINED FILTER
+            } // DEFINED FILTER
             else {
                 $this->callback = $this->name;
                 $this->options = $options;
@@ -84,18 +81,18 @@ class FormInputFilter
     {
         if (is_string($this->callback)) {
             if (!isset(static::$filters[$this->callback])) {
-                throw new \RuntimeException('Filter '.$this->callback.' unexisting for: ' . $this->name);
+                throw new \RuntimeException('Filter ' . $this->callback . ' unexisting for: ' . $this->name);
             }
             $factory = static::$filters[$this->callback];
             if (!is_callable($factory)) {
-                throw new \RuntimeException('Filter factory '.$this->callback.' not callable for: ' . $this->name);
+                throw new \RuntimeException('Filter factory ' . $this->callback . ' not callable for: ' . $this->name);
             }
             $filter = $factory($this->options);
         } else {
             $filter = $this->callback;
         }
         if (!is_callable($filter)) {
-            throw new \RuntimeException('Filter '.$this->callback.' not callable for: ' . $this->name);
+            throw new \RuntimeException('Filter ' . $this->callback . ' not callable for: ' . $this->name);
         }
         return $filter($field);
     }
@@ -121,18 +118,21 @@ class FormInputFilter
      *************************************************************************/
     public function initializeExistingFilters()
     {
-        static::addFilterDefinition('required', array($this, 'filterRequired'));
+        static::addFilterDefinition('required', array($this, 'filterRequired'), 'This field is required');
         static::addFilterDefinition('boolean', array($this, 'filterBoolean'));
         static::addFilterDefinition('validate_regexp', array($this, 'filterValidateRegexp'));
         static::addFilterDefinition('php', array($this, 'filterPHP'));
-        static::addFilterDefinition('max_length', array($this, 'filterMaxLength'));
-        static::addFilterDefinition('min_length', array($this, 'filterMinLength'));
+        static::addFilterDefinition('max_length', array($this, 'filterMaxLength'), 'This field is too long');
+        static::addFilterDefinition('min_length', array($this, 'filterMinLength'), 'This field is too short');
         static::$isInitialized = TRUE;
     }
 
-    public static function addFilterDefinition($name, $callback)
+    public static function addFilterDefinition($name, $callback, $defaultMessage = NULL)
     {
         static::$filters[$name] = $callback;
+        if (!is_null($defaultMessage)) {
+            static::$lang[$name]=$defaultMessage;
+        }
     }
 
 
@@ -161,7 +161,7 @@ class FormInputFilter
         }
         $regexp = $options[0];
         return function (&$field) use ($regexp) {
-            $options = ['options'=>['regexp' => $regexp]];
+            $options = ['options' => ['regexp' => $regexp]];
             $filtered = filter_var($field, FILTER_VALIDATE_REGEXP, $options);
             if ($filtered === FALSE) {
                 return FALSE;

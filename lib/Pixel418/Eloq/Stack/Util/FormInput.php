@@ -46,7 +46,8 @@ class FormInput
     /*************************************************************************
     TREATMENTS METHODS
      *************************************************************************/
-    public function initFetchValue($population) {
+    public function initFetchValue($population)
+    {
         if (\UArray::hasDeepSelector($population, $this->address)) {
             $this->isActive = TRUE;
             $this->fetchValue = \UArray::getDeepSelector($population, $this->address);
@@ -56,7 +57,7 @@ class FormInput
     public function validFetchValue()
     {
         foreach ($this->filters as $filterName => $filter) {
-            if ($filter->apply($this->fetchValue)===FALSE) {
+            if ($filter->apply($this->fetchValue) === FALSE) {
                 $this->error = $filterName;
                 break;
             }
@@ -66,7 +67,7 @@ class FormInput
     public function getFilter($name)
     {
         if (!isset($this->filters[$name])) {
-            throw new \RuntimeException('Try to get an unknown filter: '.$name);
+            throw new \RuntimeException('Try to get an unknown filter: ' . $name);
         }
         return $this->filters[$name];
     }
