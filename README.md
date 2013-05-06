@@ -15,20 +15,44 @@ Let's code
 --------
 
 ```php
-$form = (new FormHelper)
-    ->addField('login')
-    ->addFilter('login', 'required', 'An error message to notify your users that this field was missing')
-    ->addFilter('login', FILTER_VALIDATE_EMAIL, 'An error message to notify your users that this field must be a valid email')
-    ->addFilter('login', FILTER_SANITIZE_EMAIL) // For example, for XSS fail
-    ->addField('password')
+// Let's try and define a signup form
+$signUp = (new Form)
+		// Just add a first input
+    ->addInput('email')
+    		// We can use predefined filters
+        ->addInputFilter('email', 'required')
+        // And validation PHP filters
+        ->addInputFilter('email', FILTER_VALIDATE_EMAIL)
+        // And sanitization PHP filters
+        ->addInputFilter('email', FILTER_SANITIZE_EMAIL)
+        // And specific filters
+        ->addInputFilter('email', 'unique', function($email){
+            return get_user_by_email($email) === NULL;
+        })
+    // You can prefer use the shorthand syntax
+    ->addInput('password', 'required|min_length:8');
 
-if ( $form->isValid() ) {
-    $login = $form->get( 'login' );
-    $password = $form->get( 'password' );
-    // Log in user
+// We can access to the form state
+if ( $signUp->isValid() ) {
+		// And the form values sanitized
+    $email = $signUp->email;
+    $password = $signUp->password;
+    // ... and finally add a new user
 } else {
-    foreach ( $form->getErrors( 'login' ) as $error ) {
-        // You can print the errors of a specific field
+		// We can access to each input state
+    if ($signUp->isInputValid('email')) {
+				// And focus to make great error message
+				switch ($signUp->getInputError('email')) {
+					case 'required':
+						echo 'The email field is required';
+						break;
+					case 'validate_email':
+						echo 'This field must be a valid email';
+						break;
+					case 'unique':
+						echo 'There is already a user with this email';
+						break;
+				}
     }
 }
 ```
@@ -47,7 +71,7 @@ Add or complete the composer.json file at the root of your project, like this :
 ```json
 {
     "require": {
-        "pixel418/eloq": "0.1.*"
+        "pixel418/eloq": "0.2.*"
     }
 }
 ```
