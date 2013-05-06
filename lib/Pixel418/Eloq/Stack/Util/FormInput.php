@@ -56,7 +56,7 @@ class FormInput
     public function validFetchValue()
     {
         foreach ($this->filters as $filterName => $filter) {
-            if (!$filter->apply($this->fetchValue)) {
+            if ($filter->apply($this->fetchValue)===FALSE) {
                 $this->error = $filterName;
                 break;
             }

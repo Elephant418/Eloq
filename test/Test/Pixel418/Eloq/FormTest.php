@@ -294,6 +294,19 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('with_a', $form->getInputError('username'), 'One error must be thrown, the username field must not validate the live filter');
     }
 
+    public function testLiveFildet_Sanitize()
+    {
+        $_POST['username'] = 'lancel.lannister';
+        $form = $this->getLoginForm()
+            ->addInputFilter('username', 'without_a', function(&$field){
+                $field = str_replace('a', '', $field);
+            });
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals('lncel.lnnister', $form->username, 'The given entry must be intact');
+        $this->assertNull($form->getInputError('username'), 'No error must be thrown');
+    }
+
 
     /* EXCEPTION TEST METHODS
      *************************************************************************/
