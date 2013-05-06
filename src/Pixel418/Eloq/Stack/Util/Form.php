@@ -193,6 +193,9 @@ class Form
     public function isValid()
     {
         $this->treat();
+        if (!$this->isActive()) {
+            return FALSE;
+        }
         foreach ($this->inputs as $input) {
             if (!$input->isValid()) {
                 return FALSE;
@@ -205,6 +208,11 @@ class Form
     /* INPUT GETTER METHODS
      *************************************************************************/
     public function __get($name)
+    {
+        return $this->getInputValue($name);
+    }
+
+    public function get($name)
     {
         return $this->getInputValue($name);
     }

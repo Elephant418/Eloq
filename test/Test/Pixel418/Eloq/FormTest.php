@@ -50,6 +50,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
     {
         $form = $this->getLoginForm();
         $this->assertFalse($form->isActive(), 'Form must be inactive');
+        $this->assertFalse($form->isValid(), 'Form must be inactive');
     }
 
     public function testInactiveForm()
@@ -57,6 +58,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $_POST = ['unknownEntry' => 'someValue'];
         $form = $this->getLoginForm();
         $this->assertFalse($form->isActive(), 'Form must be inactive');
+        $this->assertFalse($form->isValid(), 'Form must be inactive');
     }
 
     public function testActiveFullForm()
