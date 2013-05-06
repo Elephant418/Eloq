@@ -248,6 +248,18 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($message, $form->getInputErrorMessage('username'), 'The error message is the one set');
     }
 
+    public function testErrorMessage_Variables()
+    {
+        $message = 'Your username must have at least %s characters';
+        $_POST['username'] = 'osha';
+        $form = $this->getLoginForm()
+            ->addInputFilterList('username', 'min_length:8', $message);
+        $this->assertTrue($form->isActive(), 'Form is detected as active');
+        $this->assertFalse($form->isValid(), 'Form is detected as invalid');
+        $this->assertEquals('min_length', $form->getInputError('username'), 'One error must be thrown, the field must be required');
+        $this->assertEquals('Your username must have at least 8 characters', $form->getInputErrorMessage('username'), 'The error message is the one set');
+    }
+
 
     /* EXCEPTION TEST METHODS
      *************************************************************************/
