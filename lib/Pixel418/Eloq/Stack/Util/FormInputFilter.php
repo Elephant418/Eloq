@@ -20,7 +20,7 @@ class FormInputFilter
 
     /* CONSTRUCTOR METHODS
      *************************************************************************/
-    public function __construct($name, $callback=NULL)
+    public function __construct($name, callable $callback=NULL)
     {
         if (!static::$isInitialized) {
             $this->initializeExistingFilters();
@@ -84,12 +84,18 @@ class FormInputFilter
     {
         if (is_string($this->callback)) {
             if (!isset(static::$filters[$this->callback])) {
-                throw new \RuntimeException('Filter not callable: ' . $this->name);
+                throw new \RuntimeException('Filter '.$this->callback.' unexisting for: ' . $this->name);
             }
             $factory = static::$filters[$this->callback];
+            if (!is_callable($factory)) {
+                throw new \RuntimeException('Filter factory '.$this->callback.' not callable for: ' . $this->name);
+            }
             $filter = $factory($this->options);
         } else {
             $filter = $this->callback;
+        }
+        if (!is_callable($filter)) {
+            throw new \RuntimeException('Filter '.$this->callback.' not callable for: ' . $this->name);
         }
         return $filter($field);
     }

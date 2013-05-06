@@ -93,7 +93,7 @@ class Form
         return $this;
     }
 
-    public function addInputFilter($inputName, $filterName, $filterCallback)
+    public function addInputFilter($inputName, $filterName, callable $filterCallback=NULL)
     {
         $input = $this->getInput($inputName);
         $filterClass = $this->namespace.'\\FormInputFilter';
