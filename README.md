@@ -1,8 +1,8 @@
 Eloq [![Build Status](https://secure.travis-ci.org/Pixel418/Eloq.png)](http://travis-ci.org/Pixel418/Eloq)
 ======
 
-Eloq is a pretty lib to handle form treatment.
-It's allow you to separate form definition and form handler.
+Eloq is a pretty lib to handle form treatment.<br>
+It's allow you to separate form definitions and form treatments.
 
 1. [Let's code](#lets-code)
 2. [How to Install](#how-to-install)
@@ -17,15 +17,13 @@ Let's code
 ```php
 // Let's try and define a signup form
 $signUp = (new Form)
-		// Just add a first input
+    // Just add a first input
     ->addInput('email')
-    		// We can use predefined filters
+        // We can use predefined filters
         ->addInputFilter('email', 'required')
-        // And validation PHP filters
-        ->addInputFilter('email', FILTER_VALIDATE_EMAIL)
-        // And sanitization PHP filters
+        // And PHP filters
         ->addInputFilter('email', FILTER_SANITIZE_EMAIL)
-        // And specific filters
+        // And your own specific filters
         ->addInputFilter('email', 'unique', function($email){
             return get_user_by_email($email) === NULL;
         })
@@ -34,24 +32,23 @@ $signUp = (new Form)
 
 // We can access to the form state
 if ( $signUp->isValid() ) {
-		// And the form values sanitized
     $email = $signUp->email;
     $password = $signUp->password;
-    // ... and finally add a new user
+    // Here we should create a new user ;)
 } else {
 		// We can access to each input state
     if ($signUp->isInputValid('email')) {
-				// And focus to make great error message
-				switch ($signUp->getInputError('email')) {
-					case 'required':
-						echo 'The email field is required';
-						break;
-					case 'validate_email':
-						echo 'This field must be a valid email';
-						break;
-					case 'unique':
-						echo 'There is already a user with this email';
-						break;
+        // And focus to make great error message
+        switch ($signUp->getInputError('email')) {
+            case 'required':
+                echo 'The email field is required';
+                break;
+            case 'validate_email':
+                echo 'This field must be a valid email';
+                break;
+            case 'unique':
+                echo 'There is already a user with this email';
+                break;
 				}
     }
 }
