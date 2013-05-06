@@ -38,18 +38,21 @@ class Form
         return $this;
     }
 
-    public function setPopulation(array $population)
+    public function setPopulation($population)
     {
         $this->setPopulationType(self::INPUT_ARRAY);
         $this->population = $population;
         return $this;
     }
 
-    public function addInput($name, $address = NULL, $populationType = NULL)
+    public function addInput($name, $filters = NULL, $address = NULL, $populationType = NULL)
     {
         $inputClass = $this->namespace . '\\FormInput';
         $input = new $inputClass($name);
         $this->inputs[$name] = $input;
+        if ($filters) {
+            $this->addInputFilters($name, $filters);
+        }
         if ($address) {
             $this->setInputAddress($name, $address, $populationType);
         }
@@ -105,12 +108,15 @@ class Form
         return $this;
     }
 
-    public function addInputFilter($inputName, $filterName, callable $filterCallback = NULL)
+    public function addInputFilter($inputName, $filterName, callable $filterCallback = NULL, $message = NULL)
     {
         $input = $this->getInput($inputName);
         $filterClass = $this->namespace . '\\FormInputFilter';
         $filter = new $filterClass($filterName, $filterCallback);
         $input->filters[$filter->getName()] = $filter;
+        if (!is_null($message)) {
+            $this->lang[$filterName] = $message;
+        }
         return $this;
     }
 
