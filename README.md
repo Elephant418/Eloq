@@ -1,8 +1,8 @@
 Eloq [![Build Status](https://secure.travis-ci.org/Pixel418/Eloq.png)](http://travis-ci.org/Pixel418/Eloq)
 ======
 
-Eloq is a pretty lib to handle form treatment.<br>
-It's allow you to separate form definitions and form treatments.
+Eloq is a PHP library to improve the security & the data validation of user forms.<br>
+It also improves code readability by separating the forms definition and treatment.
 
 1. [Let's code](#lets-code)
 2. [How to Install](#how-to-install)
