@@ -15,43 +15,28 @@ Let's code
 --------
 
 ```php
-// Let's try and define a signup form
-$signUp = (new Form)
-    // Just add a first input
-    ->addInput('email')
-        // We can use predefined filters
-        ->addInputFilter('email', 'required')
-        // And PHP filters
-        ->addInputFilter('email', FILTER_SANITIZE_EMAIL)
-        // And your own specific filters
-        ->addInputFilter('email', 'unique_email', function($email){
-            return get_user_by_email($email) === NULL;
-        })
-    // You can prefer use the shorthand syntax
-    ->addInput('password', 'required|min_length:8');
+// Login form definition
+$loginForm = (new Form)
+    ->addInput('email', 'required|email')
+    ->addInput('password', 'required');
 
-// We can access to the form state
-if ( $signUp->isValid() ) {
+// Treatment
+if ($loginForm->isValid()) {
     $email = $signUp->email;
-    $password = $signUp->password;
-    // Here we should create a new user ;)
-} else {
-		// We can access to each input state
-    if ($signUp->isInputValid('email')) {
-        // And focus to make great error message
-        switch ($signUp->getInputError('email')) {
-            case 'required':
-                echo 'This field is required';
-                break;
-            case 'validate_email':
-                echo 'This field must be a valid email';
-                break;
-            case 'unique':
-                echo 'There is already a user with this email';
-                break;
-				}
-    }
+    $password = $loginForm->password;
+    // Here we should log the user ;)
 }
+```
+```html
+<?php if (!$loginForm->isValid('email')): ?>
+	<div class="alert-error"><?= $loginForm->getInputErrorMessage('email') ?></div>
+<?php endif; ?>
+<input type="text" name="email" value="<?= $loginForm->email ?>" />
+
+<?php if (!$loginForm->isValid('password')): ?>
+	<div class="alert-error"><?= $loginForm->getInputErrorMessage('password') ?></div>
+<?php endif; ?>
+<input type="password" name="email" value="" />
 ```
 
 [&uarr; top](#readme)
