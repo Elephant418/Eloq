@@ -189,7 +189,15 @@ class Form
         return FALSE;
     }
 
-    public function isValid()
+    public function isValid($name=NULL)
+    {
+        if (is_null($name)) {
+            return $this->isFormValid();
+        }
+        return $this->isInputValid($name);
+    }
+
+    public function isFormValid()
     {
         if (!$this->isActive()) {
             return FALSE;
