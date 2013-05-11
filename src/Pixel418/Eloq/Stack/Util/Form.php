@@ -10,7 +10,8 @@ class Form
 
     /* ATTRIBUTES
      *************************************************************************/
-    const INPUT_ARRAY = 418;
+    const INPUT_MIXED = 418;
+    const INPUT_ARRAY = 419;
     static $defaultErrorMessages = [
         'required' => 'This field is required',
         'confirm' => 'This field does not match the previous one',
@@ -32,7 +33,7 @@ class Form
 
     /* CONSTRUCTOR
      *************************************************************************/
-    public function __construct($populationType = INPUT_POST)
+    public function __construct($populationType = self::INPUT_MIXED)
     {
         $this->errorMessages = static::$defaultErrorMessages;
         $this->setPopulationType($populationType);
@@ -272,6 +273,9 @@ class Form
         }
         if ($populationType === self::INPUT_ARRAY) {
             return $this->population;
+        }
+        if ($populationType === self::INPUT_MIXED) {
+            return array_merge($_POST, $_GET, $_FILES);
         }
         return filter_input_array($populationType);
     }
