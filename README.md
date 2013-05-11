@@ -17,7 +17,7 @@ Let's code
 ```php
 // Login form definition
 $loginForm = (new Form)
-    ->addInput('email', 'required|email')
+    ->addInput('email', 'required|email|validate_email')
     ->addInput('password', 'required');
 
 // Treatment
@@ -36,7 +36,7 @@ if ($loginForm->isValid()) {
 <?php if (!$loginForm->isValid('password')): ?>
 	<div class="alert-error"><?= $loginForm->getInputErrorMessage('password') ?></div>
 <?php endif; ?>
-<input type="password" name="email" value="" />
+<input type="password" name="password" value="" />
 ```
 
 [&uarr; top](#readme)
