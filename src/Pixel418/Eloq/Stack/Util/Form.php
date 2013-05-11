@@ -12,6 +12,7 @@ class Form
      *************************************************************************/
     const INPUT_MIXED = 418;
     const INPUT_ARRAY = 419;
+    const INPUT_FILES = 420;
     static $defaultErrorMessages = [
         'required' => 'This field is required',
         'confirm' => 'This field does not match the previous one',
@@ -276,6 +277,9 @@ class Form
         }
         if ($populationType === self::INPUT_MIXED) {
             return array_merge($_POST, $_GET, $_FILES);
+        }
+        if ($populationType === self::INPUT_FILES) {
+            return $_FILES;
         }
         return filter_input_array($populationType);
     }
