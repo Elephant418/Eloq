@@ -7,8 +7,6 @@ require_once __DIR__ . '/../../../../vendor/autoload.php';
 use Pixel418\Eloq\Stack\Util\Form;
 use Pixel418\Eloq\Stack\Util\FormInputFilter;
 
-echo 'Eloq ' . \Pixel418\Eloq::VERSION . ' tested with ';
-
 class FormTest extends \PHPUnit_Framework_TestCase
 {
 
