@@ -22,7 +22,7 @@ $loginForm = (new Form)
 
 // Treatment
 if ($loginForm->isValid()) {
-    $email = $signUp->email;
+    $email = $loginForm->email;
     $password = $loginForm->password;
     // Here we should log the user ;)
 }
