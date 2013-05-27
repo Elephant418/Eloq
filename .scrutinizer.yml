@@ -1,3 +1,5 @@
+before_commands:
+    - composer install
 tools:
     php_code_coverage: true
     php_code_sniffer: true
