@@ -10,8 +10,8 @@ class FormInputFilter
 
     /* ATTRIBUTES
      *************************************************************************/
-    static $filters = [];
-    static $isInitialized = FALSE;
+    static public $filters = [];
+    static public $isInitialized = FALSE;
     protected $name;
     protected $isPHPFilter = FALSE;
     protected $options;
