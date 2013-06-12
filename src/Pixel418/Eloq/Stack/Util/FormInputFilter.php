@@ -124,6 +124,7 @@ class FormInputFilter
     public function initialize()
     {
         static::addFilterDefinition('required', array($this, 'filterRequired'));
+        static::addFilterDefinition('string', array($this, 'filterString'));
         static::addFilterDefinition('boolean', array($this, 'filterBoolean'));
         static::addFilterDefinition('confirm', array($this, 'filterConfirm'));
         static::addFilterDefinition('validate_regexp', array($this, 'filterValidateRegexp'));
@@ -175,6 +176,14 @@ class FormInputFilter
                 $field = $filtered;
             }
             return TRUE;
+        };
+    }
+
+    public static function filterString()
+    {
+        return function (&$field) {
+            $options = ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES];
+            $field = filter_var($field, FILTER_SANITIZE_STRING, $options);
         };
     }
 
