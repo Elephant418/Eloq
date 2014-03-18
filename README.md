@@ -1,4 +1,4 @@
-Eloq [![Build Status](https://secure.travis-ci.org/Pixel418/Eloq.png)](http://travis-ci.org/Pixel418/Eloq)
+Eloq [![Build Status](https://secure.travis-ci.org/Pixel418/Eloq.png?branch=master)](http://travis-ci.org/Pixel418/Eloq?branch=master)
 ======
 
 Eloq is a PHP library to improve the security & the data validation of user forms.<br>
