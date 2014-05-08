@@ -128,6 +128,7 @@ class FormInputFilter
         static::addFilterDefinition('boolean', array($this, 'filterBoolean'));
         static::addFilterDefinition('confirm', array($this, 'filterConfirm'));
         static::addFilterDefinition('validate_regexp', array($this, 'filterValidateRegexp'));
+        static::addFilterDefinition('validate_url', array($this, 'filterValidateUrl'));
         static::addFilterDefinition('php', array($this, 'filterPHP'));
         static::addFilterDefinition('max_length', array($this, 'filterMaxLength'));
         static::addFilterDefinition('min_length', array($this, 'filterMinLength'));
@@ -170,6 +171,20 @@ class FormInputFilter
             if ($field !== '') {
                 $options = ['options' => ['regexp' => $regexp]];
                 $filtered = filter_var($field, FILTER_VALIDATE_REGEXP, $options);
+                if ($filtered === FALSE) {
+                    return FALSE;
+                }
+                $field = $filtered;
+            }
+            return TRUE;
+        };
+    }
+
+    public static function filterValidateUrl()
+    {
+        return function (&$field) {
+            if ($field !== '') {
+                $filtered = filter_var($field, FILTER_VALIDATE_URL);
                 if ($filtered === FALSE) {
                     return FALSE;
                 }

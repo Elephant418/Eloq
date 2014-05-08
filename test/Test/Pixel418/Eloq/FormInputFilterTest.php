@@ -33,6 +33,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
         return (new Form)
             ->addInput('username')
             ->addInput('password')
+            ->addInput('url')
             // A hack to allow $_POST data simulation
             ->setPopulation($_POST);
     }
@@ -260,6 +261,50 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($form->isValid(), 'Form must not be valid');
         $this->assertEquals($_POST['username'], $form->getInputValue('username'), 'The invalid email must be intact');
         $this->assertEquals('required', $form->getInputError('username'), 'One error must be thrown, the username field is required');
+    }
+
+    public function testPHPFilter_ValidateUrl_Nok()
+    {
+        $_POST['url'] = 'example.com';
+        $form = $this->getLoginForm()
+            ->addInputFilterList('url', 'validate_url');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must not be valid');
+        $this->assertEquals($_POST['url'], $form->url, 'The given entry must be intact');
+        $this->assertEquals('validate_url', $form->getInputError('url'), 'One error must be thrown, the url field is not a valid url');
+    }
+
+    public function testPHPFilter_ValidateUrl_Ok()
+    {
+        $_POST['url'] = 'http://example.com';
+        $form = $this->getLoginForm()
+            ->addInputFilterList('url', 'validate_url');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals($_POST['url'], $form->url, 'The given entry must be intact');
+        $this->assertNull($form->getInputError('url'), 'No error must be thrown');
+    }
+
+    public function testPHPFilter_ValidateUrl_Empty()
+    {
+        $_POST['url'] = '';
+        $form = $this->getLoginForm()
+            ->addInputFilterList('url', 'validate_url');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals($_POST['url'], $form->url, 'The given entry must be intact');
+        $this->assertNull($form->getInputError('url'), 'No error must be thrown');
+    }
+
+    public function testPHPFilter_ValidateUrl_Required()
+    {
+        $_POST['url'] = '';
+        $form = $this->getLoginForm()
+            ->addInputFilterList('url', 'validate_url|required');
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must not be valid');
+        $this->assertEquals($_POST['url'], $form->getInputValue('url'), 'The invalid url must be intact');
+        $this->assertEquals('required', $form->getInputError('url'), 'One error must be thrown, the url field is required');
     }
 
 
