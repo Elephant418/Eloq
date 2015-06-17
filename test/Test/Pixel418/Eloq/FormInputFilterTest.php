@@ -34,6 +34,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
             ->addInput('username')
             ->addInput('password')
             ->addInput('url')
+            ->addInput('date')
             // A hack to allow $_POST data simulation
             ->setPopulation($_POST);
     }
@@ -333,7 +334,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /* BOOLEAN TEST METHODS
+    /* REGEXP TEST METHODS
      *************************************************************************/
     public function testPHPFilter_Regexp_Ok()
     {
@@ -345,10 +346,7 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
         $this->assertNull($form->getInputError('username'), 'No error must be thrown');
     }
-
-
-    /* REGEXP TEST METHODS
-     *************************************************************************/
+    
     public function testPHPFilter_Regexp_Nok()
     {
         $_POST['username'] = 'mélisandre d’asshaï';
@@ -380,5 +378,32 @@ class FormInputFilterTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($form->isValid(), 'Form must be invalid');
         $this->assertEquals($_POST['username'], $form->username, 'The given entry must be intact');
         $this->assertEquals('required', $form->getInputError('username'), 'One error must be thrown, the username field is required');
+    }
+
+
+    /* DATE TEST METHODS
+     *************************************************************************/
+    public function testPHPFilter_Date_Ok()
+    {
+        $_POST['date'] = '14/07/1789';
+        $format = 'd/m/Y';
+        $form = $this->getLoginForm()
+            ->addInputFilterList('date', 'validate_date:'.$format);
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertTrue($form->isValid(), 'Form must be valid');
+        $this->assertEquals($_POST['date'], $form->date, 'The given entry must be intact');
+        $this->assertNull($form->getInputError('date'), 'No error must be thrown');
+    }
+    
+    public function testPHPFilter_Date_Nok()
+    {
+        $_POST['date'] = '14/07/1789';
+        $format = 'd/m/y';
+        $form = $this->getLoginForm()
+            ->addInputFilterList('date', 'validate_date:'.$format);
+        $this->assertTrue($form->isActive(), 'Form must be active');
+        $this->assertFalse($form->isValid(), 'Form must be invalid');
+        $this->assertEquals($_POST['date'], $form->date, 'The given entry must be intact');
+        $this->assertEquals('validate_date', $form->getInputError('date'), 'One error must be thrown');
     }
 }

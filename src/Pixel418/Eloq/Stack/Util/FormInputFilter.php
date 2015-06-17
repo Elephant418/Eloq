@@ -129,6 +129,7 @@ class FormInputFilter
         static::addFilterDefinition('confirm', array($this, 'filterConfirm'));
         static::addFilterDefinition('validate_regexp', array($this, 'filterValidateRegexp'));
         static::addFilterDefinition('validate_url', array($this, 'filterValidateUrl'));
+        static::addFilterDefinition('validate_date', array($this, 'filterValidateDate'));
         static::addFilterDefinition('php', array($this, 'filterPHP'));
         static::addFilterDefinition('max_length', array($this, 'filterMaxLength'));
         static::addFilterDefinition('min_length', array($this, 'filterMinLength'));
@@ -175,6 +176,23 @@ class FormInputFilter
                     return FALSE;
                 }
                 $field = $filtered;
+            }
+            return TRUE;
+        };
+    }
+
+    public function filterValidateDate($options)
+    {
+        if (!count($options)) {
+            throw new \RuntimeException('Missing mandatory option: format');
+        }
+        $format = $options[0];
+        return function (&$field) use ($format) {
+            if ($field !== '') {
+                $date = \DateTime::createFromFormat($format, $field);
+                if ($date === FALSE) {
+                    return FALSE;
+                }
             }
             return TRUE;
         };
