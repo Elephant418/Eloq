@@ -143,7 +143,7 @@ class FormInputFilter
 
     /* CUSTOM FILTER METHODS
      *************************************************************************/
-    public static function filterPHP($options)
+    public function filterPHP($options)
     {
         if (!count($options)) {
             throw new \RuntimeException('Missing mandatory option: filter name');
@@ -161,7 +161,7 @@ class FormInputFilter
         };
     }
 
-    public static function filterValidateRegexp($options)
+    public function filterValidateRegexp($options)
     {
         if (!count($options)) {
             throw new \RuntimeException('Missing mandatory option: regexp');
@@ -180,7 +180,7 @@ class FormInputFilter
         };
     }
 
-    public static function filterValidateUrl()
+    public function filterValidateUrl()
     {
         return function (&$field) {
             if ($field !== '') {
@@ -194,7 +194,7 @@ class FormInputFilter
         };
     }
 
-    public static function filterString()
+    public function filterString()
     {
         return function (&$field) {
             $options = ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES];
@@ -202,7 +202,7 @@ class FormInputFilter
         };
     }
 
-    public static function filterBoolean()
+    public function filterBoolean()
     {
         return function (&$field) {
             $options = ['flags' => FILTER_NULL_ON_FAILURE];
@@ -215,14 +215,14 @@ class FormInputFilter
         };
     }
 
-    public static function filterRequired()
+    public function filterRequired()
     {
         return function ($field) {
             return (!is_null($field) && $field !== '');
         };
     }
 
-    public static function filterConfirm($options)
+    public function filterConfirm($options)
     {
         if (!count($options)) {
             throw new \RuntimeException('Missing mandatory option: source');
@@ -233,7 +233,7 @@ class FormInputFilter
         };
     }
 
-    public static function filterMaxLength($options)
+    public function filterMaxLength($options)
     {
         if (!count($options)) {
             throw new \RuntimeException('Missing mandatory option: maxLength');
@@ -247,7 +247,7 @@ class FormInputFilter
         };
     }
 
-    public static function filterMinLength($options)
+    public function filterMinLength($options)
     {
         if (!count($options)) {
             throw new \RuntimeException('Missing mandatory option: minLength');
